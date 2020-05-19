@@ -1,0 +1,8 @@
+[Plugin]
+Loader=python3
+Module=lspJump
+IAge=3
+Name=lspJump
+Description=jump around documents using the lsp protocol
+Authors=Tsushima Masatoshi <utisam@gmail.com>, based on gtagJump by: Tsushima Masatoshi <utisam@gmail.com>, Jacek Pliszka <Jacek.Pliszka@gmail.com>
+Copyright=Copyright © 2020- Florian Evaldsson <florevald@gmail.com>, license GPLv3
