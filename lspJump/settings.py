@@ -15,6 +15,12 @@
 #	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from lspJump.LspNavigator import LspNavigator
+import xml.etree.ElementTree as ET
+import os
+
+#########
+
+SETTINGS_FILE = os.path.dirname(os.path.realpath(__file__))+"settings.xml"
 
 LSP_BIN = "/usr/bin/ccls"
 
@@ -29,3 +35,28 @@ keyProjDir = "F5"
 historymax = 100
 
 LSP_NAVIGATOR=None
+
+#########
+
+def getSettings():
+	global LSP_BIN
+	if os.path.exists(SETTINGS_FILE):
+		tree = ET.parse(SETTINGS_FILE)
+		if tree is not None:
+			root = tree.getroot()
+			if root is not None:
+				LSP_BIN = root.findall("lsp_bin")[0].text
+
+def setLspBin(path):
+	global LSP_BIN
+	LSP_BIN = path
+	
+	data = ET.Element('data')
+	lsp_bin = ET.SubElement(data, 'lsp_bin')
+	lsp_bin.text = LSP_BIN
+	
+	mydata = ET.tostring(data)
+	myfile = open(SETTINGS_FILE, "wb")
+	myfile.write(mydata)
+
+getSettings()

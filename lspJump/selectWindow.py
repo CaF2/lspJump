@@ -77,8 +77,8 @@ class ProjectDir(Gtk.Window):
 		
 		
 		button = Gtk.Button(label="Change")
-		grid.attach(button, 1, 0, 1, 1)
 		button.connect("clicked", self._change)
+		grid.attach(button, 1, 0, 1, 1)
 		
 		button_get_proj = Gtk.Button(label="Get project dir")
 		grid.attach(button_get_proj, 0, 1, 1, 1)
@@ -101,19 +101,23 @@ class ProjectDir(Gtk.Window):
 		this_file=this_file_obj.get_uri_for_display()
 		print(os.path.dirname(this_file))
 		self.entry.set_text(os.path.dirname(this_file))
-class MockPlugin:
-	def open_location(self, f, l):
-		print(f.get_path())
-		print(l)
-		Gtk.main_quit()
 
-def main():
-	window = SelectWindow(MockPlugin(), "test", [
-		("testfile.py", 10, "def testfunc():", "not visible"),
-		("testfile.py", 10, "def testfunc():", "not visible"),
-		], lambda _: Gtk.main_quit())
-	window.show_all()
-	Gtk.main()
-	return 0
-if __name__ == '__main__':
-	sys.exit(main())
+class SettingsWindow(Gtk.Grid):
+	def __init__(self, plugin):
+		Gtk.Grid.__init__(self)
+		self.set_column_homogeneous(True)
+		
+		label=Gtk.Label("Path to the LSP server binary:")
+		self.attach(label, 0, 0, 1, 1)
+		
+		self.entry=Gtk.Entry()
+		self.entry.set_text(settings.LSP_BIN)
+		self.attach(self.entry, 0, 1, 1, 1)
+		
+		button = Gtk.Button(label="Change")
+		button.connect("clicked", self._change)
+		self.attach(button, 1, 1, 1, 1)
+	
+	def _change(self, w):
+		print(self.entry.get_text())
+		settings.setLspBin(self.entry.get_text())

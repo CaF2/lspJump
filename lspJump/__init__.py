@@ -19,9 +19,9 @@ from subprocess import CalledProcessError
 import os
 
 from gi.repository import GObject, Gedit, Gio
+from gi.repository import PeasGtk
 
 from lspJump import selectWindow, settings
-
 
 def getCurrentIdentifier(doc):
 	return doc.get_iter_at_mark(doc.get_insert())
@@ -54,7 +54,7 @@ class lspJumpAppActivatable(GObject.Object, Gedit.AppActivatable):
 		self.menu_ext = None
 
 
-class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable):
+class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurable):
 	__gtype_name = "lspJump"
 	window = GObject.property(type=Gedit.Window)
 	backstack = deque()
@@ -80,6 +80,10 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable):
 	def do_update_state(self):
 		pass
 
+	
+	def do_create_configure_widget(self):
+		return selectWindow.SettingsWindow(self);
+
 	def __jump(self, navi_method):
 		if settings.LSP_NAVIGATOR is not None:
 			doc = self.window.get_active_document()
@@ -94,7 +98,6 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable):
 	def __jump_ref(self, action, dummy):
 		self.__jump(lambda navi: navi.getReferences)
 	def __back(self, action, dummy):
-		print("BACK")
 		try:
 			preLocation = self.backstack.pop()
 		except IndexError:
