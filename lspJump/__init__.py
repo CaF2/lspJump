@@ -94,12 +94,14 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable):
 	def __jump_ref(self, action, dummy):
 		self.__jump(lambda navi: navi.getReferences)
 	def __back(self, action, dummy):
+		print("BACK")
 		try:
 			preLocation = self.backstack.pop()
 		except IndexError:
 			return
 		self.add_history(self.nextstack)
-		self.open_location(preLocation[0], preLocation[1])
+		gio_file = Gio.File.new_for_path(preLocation[0].get_location().get_path())
+		self.open_location(gio_file, preLocation[1])
 
 	def __next(self, action, dummy):
 		try:
@@ -107,7 +109,8 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable):
 		except IndexError:
 			return
 		self.add_history(self.backstack)
-		self.open_location(nextLocation[0], nextLocation[1])
+		gio_file = Gio.File.new_for_path(preLocation[0].get_location().get_path())
+		self.open_location(gio_file, nextLocation[1])
 	def __projdir(self, action, dummy):
 		window = selectWindow.ProjectDir(self)
 		window.show_all()

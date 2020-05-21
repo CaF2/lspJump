@@ -19,7 +19,7 @@ Clone this project into
 ```
 mkdir -p ~/.local/share/gedit/plugins
 cd ~/.local/share/gedit/plugins
-git clone https://github.com/CaF2/lspJump
+git clone https://github.com/CaF2/lspJump.git
 ```
 
 Open gedit and do
@@ -32,6 +32,7 @@ Open gedit and do
 * Hit "F5" and write the path to the folder with "compile_commands.json"
 * Press "change"
 * F3 (go to definition) and F4 (show references) should now work if you have clicked somewhere in your code
+* To go back press "alt+b", to go forwards press "alt+n"
 
 ## Note
 
