@@ -1,4 +1,4 @@
-#	lspJump - a gedit plugin to browse code using the LSP protocol (https://microsoft.github.io/language-server-protocol/)
+#	lspJump - a gedit plugin to browse code using the LSP protocol
 #	Copyright (C) 2020  Florian Evaldsson
 
 #	This program is free software: you can redistribute it and/or modify
@@ -66,58 +66,67 @@ class SelectWindow(Gtk.Window):
 class ProjectDir(Gtk.Window):
 	def __init__(self, plugin):
 		Gtk.Window.__init__(self)
-		self.plugin = plugin
-		
-		grid=Gtk.Grid()
-		grid.set_column_homogeneous(True)
-		
-		self.entry=Gtk.Entry()
-		self.entry.set_text(settings.PROJECT_PATH)
-		grid.attach(self.entry, 0, 0, 1, 1)
-		
-		
-		button = Gtk.Button(label="Change")
-		button.connect("clicked", self._change)
-		grid.attach(button, 1, 0, 1, 1)
-		
-		button_get_proj = Gtk.Button(label="Get project dir")
-		grid.attach(button_get_proj, 0, 1, 1, 1)
-		button_get_proj.connect("clicked", self._get_proj)
-		
-		self.add(grid)
+
+		settings_widget=SettingsWindow(plugin)
+		self.add(settings_widget)
 		
 		self.set_size_request(700, 360)
-	def _change(self, w):
-		print(self.entry.get_text())
+	
+
+class SettingsWindow(Gtk.Grid):
+	def __init__(self, plugin):
+		Gtk.Grid.__init__(self)
+		
+		self.plugin = plugin
+		
+		self.set_column_homogeneous(True)
+		
+		row_num=0
+		
+		label=Gtk.Label("Project path:")
+		self.attach(label, 0, row_num, 1, 1)
+		row_num=row_num+1
+		
+		self.path_entry=Gtk.Entry()
+		self.path_entry.set_text(settings.PROJECT_PATH)
+		self.attach(self.path_entry, 0, row_num, 1, 1)
+		
+		button = Gtk.Button(label="Change")
+		button.connect("clicked", self._change_project_path)
+		self.attach(button, 1, row_num, 1, 1)
+		row_num=row_num+1
+		
+		button_get_proj = Gtk.Button(label="Get project dir")
+		button_get_proj.connect("clicked", self._get_proj)
+		self.attach(button_get_proj, 0, row_num, 1, 1)
+		row_num=row_num+1
+		
+		label=Gtk.Label("Path to the LSP server binary:")
+		self.attach(label, 0, row_num, 1, 1)
+		row_num=row_num+1
+		
+		self.bin_entry=Gtk.Entry()
+		self.bin_entry.set_text(settings.LSP_BIN)
+		self.attach(self.bin_entry, 0, row_num, 1, 1)
+		
+		button = Gtk.Button(label="Change")
+		button.connect("clicked", self._change_binary)
+		self.attach(button, 1, row_num, 1, 1)
+		
+	def _change_project_path(self, w):
+		print(self.path_entry.get_text())
 		
 		if settings.LSP_NAVIGATOR is not None:
 			settings.LSP_NAVIGATOR.lsp_endpoint.shutdown()
 			settings.LSP_NAVIGATOR.lsp_endpoint.send_notification("exit")
-		settings.PROJECT_PATH=self.entry.get_text()
+		settings.PROJECT_PATH=self.path_entry.get_text()
 		settings.LSP_NAVIGATOR=LspNavigator()
 		# settings.LSP_NAVIGATOR._initialize_project_path(settings.PROJECT_PATH)
 	def _get_proj(self, w):
 		this_file_obj=self.plugin.window.get_active_document()
 		this_file=this_file_obj.get_uri_for_display()
 		print(os.path.dirname(this_file))
-		self.entry.set_text(os.path.dirname(this_file))
-
-class SettingsWindow(Gtk.Grid):
-	def __init__(self, plugin):
-		Gtk.Grid.__init__(self)
-		self.set_column_homogeneous(True)
-		
-		label=Gtk.Label("Path to the LSP server binary:")
-		self.attach(label, 0, 0, 1, 1)
-		
-		self.entry=Gtk.Entry()
-		self.entry.set_text(settings.LSP_BIN)
-		self.attach(self.entry, 0, 1, 1, 1)
-		
-		button = Gtk.Button(label="Change")
-		button.connect("clicked", self._change)
-		self.attach(button, 1, 1, 1, 1)
-	
-	def _change(self, w):
-		print(self.entry.get_text())
-		settings.setLspBin(self.entry.get_text())
+		self.path_entry.set_text(os.path.dirname(this_file))
+	def _change_binary(self, w):
+		print(self.bin_entry.get_text())
+		settings.setLspBin(self.bin_entry.get_text())

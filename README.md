@@ -9,8 +9,11 @@ GPLv3.0 See LICENSE.txt
 ## Requires
 
 * ccls (https://github.com/MaskRay/ccls) (C,C++,Objective-C)
+* pyls (https://github.com/palantir/python-language-server) (Python)
 
-Maybe other languages work? You can change in settings.py if you want to try another server.
+Maybe other languages work? You can change in settings (F5) if you want to try another server.
+
+To change to another language, simply type something like "/usr/bin/pyls" in the settings.
 
 ## Installation
 

@@ -1,4 +1,4 @@
-#	lspJump - a gedit plugin to browse code using the LSP protocol (https://microsoft.github.io/language-server-protocol/)
+#	lspJump - a gedit plugin to browse code using the LSP protocol
 #	Copyright (C) 2020  Florian Evaldsson
 
 #	This program is free software: you can redistribute it and/or modify
