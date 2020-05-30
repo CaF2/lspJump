@@ -31,7 +31,7 @@ ACTION_DEFS = [
 	("lspJumpRef", "Jump Ref", settings.keyJumpRef),
 	("lspJumpBack", "Jump Back", settings.keyJumpBack),
 	("lspJumpNext", "Jump Next", settings.keyJumpNext),
-	("lspJumpProjDir", "Project Dir", settings.keyProjDir),
+	("lspJumpProjDir", "Project Dir", settings.keyProjDir)
 ]
 
 
@@ -66,7 +66,7 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			"lspJumpRef": self.__jump_ref,
 			"lspJumpBack": self.__back,
 			"lspJumpNext": self.__next,
-			"lspJumpProjDir": self.__projdir,
+			"lspJumpProjDir": self.__projdir
 		}
 		for name, title, key in ACTION_DEFS:
 			action = Gio.SimpleAction(name=name)
@@ -91,12 +91,13 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			refs = navi_method(settings.LSP_NAVIGATOR)(doc, identifier)
 			self.add_history(self.backstack)
 			self.jump(refs, identifier)
-
+	
 	def __jump_def(self, action, dummy):
 		self.__jump(lambda navi: navi.getDefinitions)
-
+	
 	def __jump_ref(self, action, dummy):
 		self.__jump(lambda navi: navi.getReferences)
+	
 	def __back(self, action, dummy):
 		try:
 			preLocation = self.backstack.pop()
@@ -105,27 +106,28 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 		self.add_history(self.nextstack)
 		gio_file = Gio.File.new_for_path(preLocation[0].get_location().get_path())
 		self.open_location(gio_file, preLocation[1])
-
+	
 	def __next(self, action, dummy):
 		try:
 			nextLocation = self.nextstack.pop()
 		except IndexError:
 			return
 		self.add_history(self.backstack)
-		gio_file = Gio.File.new_for_path(preLocation[0].get_location().get_path())
+		gio_file = Gio.File.new_for_path(nextLocation[0].get_location().get_path())
 		self.open_location(gio_file, nextLocation[1])
+	
 	def __projdir(self, action, dummy):
 		window = selectWindow.ProjectDir(self)
 		window.show_all()
-
+	
 	def jump(self, locations, identifier):
 		"""
 		locations: [(Gio.File, int)] or [(str, int), ...]
 		"""
-
+	
 		if not locations:
 			return
-
+	
 		def location_opener(location):
 			path, line, code, doc_path = location
 			if isinstance(path, Gio.File):
@@ -135,7 +137,7 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 				newpath = os.path.normpath(os.path.join(dirname, path))
 				gio_file = Gio.File.new_for_path(newpath)
 			self.open_location(gio_file, line)
-
+	
 		if len(locations) == 1:
 			location_opener(locations[0])
 		else:

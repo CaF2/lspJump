@@ -1,6 +1,6 @@
 # lspJump
 
-A gedit plugin to browse code using the LSP protocol (https://microsoft.github.io/language-server-protocol/)
+GEdit plugin to browse code using the LSP protocol (https://microsoft.github.io/language-server-protocol/)
 
 ## License
 
@@ -35,7 +35,7 @@ Open gedit and do
 * Hit "F5" and write the path to the folder with "compile_commands.json"
 * Press "change"
 * F3 (go to definition) and F4 (show references) should now work if you have clicked somewhere in your code
-* To go back press "alt+b", to go forwards press "alt+n"
+* To go back press "alt+b", to go forwards press "alt+shift+b"
 
 ## Note
 

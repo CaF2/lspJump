@@ -29,7 +29,7 @@ PROJECT_PATH = ''
 keyJumpDef = "F3"
 keyJumpRef = "F4"
 keyJumpBack = "<Alt>b"
-keyJumpNext = "<Alt>n"
+keyJumpNext = "<Alt><Shift>b"
 keyProjDir = "F5"
 
 historymax = 100
