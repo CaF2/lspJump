@@ -27,11 +27,11 @@ def getCurrentIdentifier(doc):
 	return doc.get_iter_at_mark(doc.get_insert())
 
 ACTION_DEFS = [
-	("lspJumpDef", "Jump Def", settings.keyJumpDef),
-	("lspJumpRef", "Jump Ref", settings.keyJumpRef),
-	("lspJumpBack", "Jump Back", settings.keyJumpBack),
-	("lspJumpNext", "Jump Next", settings.keyJumpNext),
-	("lspJumpProjDir", "Project Dir", settings.keyProjDir)
+	("lspJumpDef", "Go to definition", settings.keyJumpDef),
+	("lspJumpRef", "Go to reference", settings.keyJumpRef),
+	("lspJumpBack", "lspJump undo", settings.keyJumpBack),
+	("lspJumpNext", "lspJump redo", settings.keyJumpNext),
+	("lspJumpProjDir", "lspJump settings", settings.keyProjDir)
 ]
 
 
@@ -40,7 +40,8 @@ class lspJumpAppActivatable(GObject.Object, Gedit.AppActivatable):
 	app = GObject.property(type=Gedit.App)
 
 	def do_activate(self):
-		self.menu_ext = self.extend_menu("tools-section")
+		#see https://gitlab.gnome.org/GNOME/gedit/-/blob/master/gedit/resources/gtk/menus-traditional.ui for the position
+		self.menu_ext = self.extend_menu("search-section")
 		for name, title, key in ACTION_DEFS:
 			accelerator = "win." + name
 			self.app.add_accelerator(key, accelerator, None)
