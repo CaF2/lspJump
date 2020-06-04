@@ -71,22 +71,70 @@ class ProjectDir(Gtk.Window):
 		self.add(settings_widget)
 		
 		self.set_size_request(700, 360)
-	
+
+class LanguageSettings(Gtk.Dialog):
+	def __init__(self, parent,name,dialog_type):
+		Gtk.Dialog.__init__(self,"My Dialog",parent.get_toplevel(),0,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OK,Gtk.ResponseType.OK))
+		
+		box = self.get_content_area()
+		
+		label=Gtk.Label("Profile name:")
+		box.add(label)
+		
+		self.name=Gtk.Entry()
+		self.name.set_text(name)
+		box.add(self.name)
+
+		label=Gtk.Label("Lanuage names (comma separated):")
+		box.add(label)
+		
+		self.lang_name=Gtk.Entry()
+		self.lang_name.set_text(settings.LSP_LANGUAGES)
+		box.add(self.lang_name)
+		
+		label=Gtk.Label("Path to the LSP server binary:")
+		box.add(label)
+		
+		self.bin_entry=Gtk.Entry()
+		self.bin_entry.set_text(settings.LSP_BIN)
+		box.add(self.bin_entry)
+		
+		label=Gtk.Label("Language settings:")
+		box.add(label)
+		
+		self.textview = Gtk.TextView()
+		self.tbuffer=Gtk.TextBuffer()
+		self.tbuffer.set_text(settings.LSP_SETTINGS)
+		self.textview.set_buffer(self.tbuffer)
+		box.add(self.textview)
+
+		self.show_all()
+
+		self.set_size_request(700, 360)
 
 class SettingsWindow(Gtk.Grid):
 	def __init__(self, plugin):
 		Gtk.Grid.__init__(self)
 		
 		self.plugin = plugin
-		
+
 		self.set_column_homogeneous(True)
 		
 		row_num=0
 		
 		label=Gtk.Label("Project path:")
-		self.attach(label, 0, row_num, 1, 1)
+		self.attach(label, 0, row_num, 2, 1)
 		row_num=row_num+1
 		
+		cb = Gtk.ComboBoxText()
+		cb.connect("changed", self._click_histoy_path)
+		path_histories = settings.SETTINGS_DATA.findall("path_history")
+		for ppath in path_histories:
+			if ppath.text is not None:
+				cb.append_text(ppath.text)
+		self.attach(cb, 0, row_num, 2, 1)
+		row_num=row_num+1
+
 		self.path_entry=Gtk.Entry()
 		self.path_entry.set_text(settings.PROJECT_PATH)
 		self.attach(self.path_entry, 0, row_num, 1, 1)
@@ -101,32 +149,82 @@ class SettingsWindow(Gtk.Grid):
 		self.attach(button_get_proj, 0, row_num, 1, 1)
 		row_num=row_num+1
 		
-		label=Gtk.Label("Path to the LSP server binary:")
-		self.attach(label, 0, row_num, 1, 1)
+		label=Gtk.Label("Profiles")
+		self.attach(label, 0, row_num, 2, 1)
 		row_num=row_num+1
 		
-		self.bin_entry=Gtk.Entry()
-		self.bin_entry.set_text(settings.LSP_BIN)
-		self.attach(self.bin_entry, 0, row_num, 1, 1)
-		
-		button = Gtk.Button(label="Change")
-		button.connect("clicked", self._change_binary)
-		self.attach(button, 1, row_num, 1, 1)
-		
+		self.lang_cb = Gtk.ComboBoxText()
+		# cb.connect("changed", self.on_changed)
+		language_settings = settings.SETTINGS_DATA.findall("language")
+		for language_setting in language_settings:
+			lang_name = language_setting.get("name")
+			if lang_name is not None:
+				self.lang_cb.append_text(lang_name)
+		self.attach(self.lang_cb, 0, row_num, 2, 1)
+		row_num=row_num+1
+
+		button_get_proj = Gtk.Button(label="New")
+		button_get_proj.connect("clicked", self._new_language)
+		self.attach(button_get_proj, 0, row_num, 1, 1)
+
+		button_get_proj = Gtk.Button(label="Remove")
+		button_get_proj.connect("clicked", self._new_language)
+		self.attach(button_get_proj, 1, row_num, 1, 1)
+		row_num=row_num+1
+
+		button_get_proj = Gtk.Button(label="Edit")
+		button_get_proj.connect("clicked", self._edit_language)
+		self.attach(button_get_proj, 0, row_num, 1, 1)
+
+		button_get_proj = Gtk.Button(label="Set")
+		button_get_proj.connect("clicked", self._set_language)
+		self.attach(button_get_proj, 1, row_num, 1, 1)
+		row_num=row_num+1
 	def _change_project_path(self, w):
-		print(self.path_entry.get_text())
+		new_path=self.path_entry.get_text()
+		print("Changed to: "+new_path)
+		settings.addPreviousPath(new_path)
 		
 		if settings.LSP_NAVIGATOR is not None:
 			settings.LSP_NAVIGATOR.lsp_endpoint.shutdown()
 			settings.LSP_NAVIGATOR.lsp_endpoint.send_notification("exit")
-		settings.PROJECT_PATH=self.path_entry.get_text()
+		settings.PROJECT_PATH=new_path
 		settings.LSP_NAVIGATOR=LspNavigator()
 		# settings.LSP_NAVIGATOR._initialize_project_path(settings.PROJECT_PATH)
+	def _new_language(self, w):
+		dialog=LanguageSettings(self,"",False)
+		response=dialog.run()
+		if response == Gtk.ResponseType.OK:
+			print(dialog.lang_name.get_text())
+			start,end=dialog.tbuffer.get_bounds()
+			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.tbuffer.get_text(start,end,False),False)
+			print("The OK button was clicked")
+		elif response == Gtk.ResponseType.CANCEL:
+			print("The Cancel button was clicked")
+		dialog.destroy()
+	def _edit_language(self, w):
+		profile_name=self.lang_cb.get_active_text()
+		print("Editing::"+profile_name)
+		settings.getSettings(profile_name)
+		dialog=LanguageSettings(self,profile_name,False)
+		response=dialog.run()
+		if response == Gtk.ResponseType.OK:
+			print(dialog.lang_name.get_text())
+			start,end=dialog.tbuffer.get_bounds()
+			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.tbuffer.get_text(start,end,False),True)
+			print("The OK button was clicked")
+		elif response == Gtk.ResponseType.CANCEL:
+			print("The Cancel button was clicked")
+		dialog.destroy()
+	def _set_language(self, w):
+		profile_name=self.lang_cb.get_active_text()
+		print("Opening::"+profile_name)
+		settings.getSettings(profile_name)
 	def _get_proj(self, w):
 		this_file_obj=self.plugin.window.get_active_document()
 		this_file=this_file_obj.get_uri_for_display()
 		print(os.path.dirname(this_file))
 		self.path_entry.set_text(os.path.dirname(this_file))
-	def _change_binary(self, w):
-		print(self.bin_entry.get_text())
-		settings.setLspBin(self.bin_entry.get_text())
+	def _click_histoy_path(self, w):
+		npath=w.get_active_text()
+		self.path_entry.set_text(npath)
