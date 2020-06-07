@@ -153,33 +153,50 @@ class SettingsWindow(Gtk.Grid):
 		self.attach(label, 0, row_num, 2, 1)
 		row_num=row_num+1
 		
-		self.lang_cb = Gtk.ComboBoxText()
-		# cb.connect("changed", self.on_changed)
-		language_settings = settings.SETTINGS_DATA.findall("language")
-		for language_setting in language_settings:
-			lang_name = language_setting.get("name")
-			if lang_name is not None:
-				self.lang_cb.append_text(lang_name)
-		self.attach(self.lang_cb, 0, row_num, 2, 1)
+		self.langugage_combo_pos=row_num
 		row_num=row_num+1
 
 		button_get_proj = Gtk.Button(label="New")
 		button_get_proj.connect("clicked", self._new_language)
 		self.attach(button_get_proj, 0, row_num, 1, 1)
-
-		button_get_proj = Gtk.Button(label="Remove")
-		button_get_proj.connect("clicked", self._new_language)
-		self.attach(button_get_proj, 1, row_num, 1, 1)
-		row_num=row_num+1
-
+		
 		button_get_proj = Gtk.Button(label="Edit")
 		button_get_proj.connect("clicked", self._edit_language)
+		self.attach(button_get_proj, 1, row_num, 1, 1)
+		
+		row_num=row_num+1
+
+		button_get_proj = Gtk.Button(label="Remove")
+		button_get_proj.connect("clicked", self._remove_language)
 		self.attach(button_get_proj, 0, row_num, 1, 1)
 
 		button_get_proj = Gtk.Button(label="Set")
 		button_get_proj.connect("clicked", self._set_language)
 		self.attach(button_get_proj, 1, row_num, 1, 1)
 		row_num=row_num+1
+		
+		self._generate_language_combo()
+	def _generate_language_combo(self):
+		if hasattr(self,"lang_cb"):
+			self.lang_cb.destroy()
+		self.lang_cb = Gtk.ComboBoxText()
+		# cb.connect("changed", self.on_changed)
+		language_settings = settings.SETTINGS_DATA.findall("language")
+		index=0
+		choosen_index=0
+		for language_setting in language_settings:
+			lang_name = language_setting.get("name")
+			if lang_name is not None:
+				self.lang_cb.append_text(lang_name)
+				
+				if settings.SETTINGS_LANGUAGE is not None:
+					if lang_name==settings.SETTINGS_LANGUAGE.get("name"):
+						choosen_index=index
+				index=index+1
+		self.lang_cb.set_active(choosen_index)
+		self._set_language(None)
+		self.attach(self.lang_cb, 0, self.langugage_combo_pos, 2, 1)
+		self.lang_cb.show()
 	def _change_project_path(self, w):
 		new_path=self.path_entry.get_text()
 		print("Changed to: "+new_path)
@@ -198,10 +215,29 @@ class SettingsWindow(Gtk.Grid):
 			print(dialog.lang_name.get_text())
 			start,end=dialog.tbuffer.get_bounds()
 			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.tbuffer.get_text(start,end,False),False)
-			print("The OK button was clicked")
-		elif response == Gtk.ResponseType.CANCEL:
-			print("The Cancel button was clicked")
+		# 	print("The OK button was clicked")
+		# elif response == Gtk.ResponseType.CANCEL:
+		# 	print("The Cancel button was clicked")
 		dialog.destroy()
+		self._generate_language_combo()
+	def _remove_language(self, w):
+		profile_name=self.lang_cb.get_active_text()
+		dialog = Gtk.MessageDialog(
+			self.get_toplevel(),
+			0,
+			Gtk.MessageType.QUESTION,
+			Gtk.ButtonsType.YES_NO,
+			"Do you want to remove the language \""+profile_name+"\"",
+		)
+		# dialog.format_secondary_text("And this is the secondary text that explains things.")
+		response = dialog.run()
+		if response == Gtk.ResponseType.YES:
+			print("QUESTION dialog closed by clicking YES button")
+			settings.removeLanguage(profile_name)
+		elif response == Gtk.ResponseType.NO:
+			print("QUESTION dialog closed by clicking NO button")
+		dialog.destroy()
+		self._generate_language_combo()
 	def _edit_language(self, w):
 		profile_name=self.lang_cb.get_active_text()
 		print("Editing::"+profile_name)
@@ -216,6 +252,7 @@ class SettingsWindow(Gtk.Grid):
 		elif response == Gtk.ResponseType.CANCEL:
 			print("The Cancel button was clicked")
 		dialog.destroy()
+		self._generate_language_combo()
 	def _set_language(self, w):
 		profile_name=self.lang_cb.get_active_text()
 		print("Opening::"+profile_name)

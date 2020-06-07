@@ -308,13 +308,15 @@ class LspNavigator:
 		
 		def_s=self.lsp_endpoint.call_method("textDocument/definition", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
 		
-		urlp = urllib.parse.urlparse(def_s[0]['uri'])
-		urlps = urllib.parse.unquote(os.path.abspath(os.path.join(urlp.netloc, urlp.path)))
-		print(def_s)
-		print("File:"+urlps+" From[Line:"+str(def_s[0]['range']['start']['line']+1)+" Character:"+str(def_s[0]['range']['start']['character'])+"]"+" To[Line:"+str(def_s[0]['range']['end']['line']+1)+" Character:"+str(def_s[0]['range']['end']['character'])+"]")
-		
-		return [[urlps, int(def_s[0]['range']['start']['line'])+1, int(def_s[0]['range']['start']['character']), def_s[0]['uri']]]
-		
+		try:
+			urlp = urllib.parse.urlparse(def_s[0]['uri'])
+			urlps = urllib.parse.unquote(os.path.abspath(os.path.join(urlp.netloc, urlp.path)))
+			print(def_s)
+			print("File:"+urlps+" From[Line:"+str(def_s[0]['range']['start']['line']+1)+" Character:"+str(def_s[0]['range']['start']['character'])+"]"+" To[Line:"+str(def_s[0]['range']['end']['line']+1)+" Character:"+str(def_s[0]['range']['end']['character'])+"]")
+			
+			return [[urlps, int(def_s[0]['range']['start']['line'])+1, int(def_s[0]['range']['start']['character']), def_s[0]['uri']]]
+		except IndexError:
+			return None
 	def getReferences(self, doc, identifier):
 		doc_uri = doc.get_uri_for_display()
 		

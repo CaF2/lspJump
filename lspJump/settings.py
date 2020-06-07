@@ -21,6 +21,7 @@ import os
 #########
 
 SETTINGS_FILE = os.path.dirname(os.path.realpath(__file__))+"settings.xml"
+#root of xml
 SETTINGS_DATA = None
 #current language structure
 SETTINGS_LANGUAGE = None
@@ -166,10 +167,13 @@ def setLspConfiguration(name,language,path,settings,overwrite=True):
 	if lsp_settings_exists is False:
 		lsp_settings = ET.SubElement(SETTINGS_LANGUAGE, 'lsp_settings')
 	lsp_settings.text = LSP_SETTINGS
+	write_settings_data()
 
-	mydata = ET.tostring(SETTINGS_DATA)
-	myfile = open(SETTINGS_FILE, "wb")
-	myfile.write(mydata)
+def write_settings_data():
+	if SETTINGS_DATA is not None:
+		mydata = ET.tostring(SETTINGS_DATA)
+		myfile = open(SETTINGS_FILE, "wb")
+		myfile.write(mydata)
 
 def addPreviousPath(path):
 	global SETTINGS_DATA
@@ -182,5 +186,13 @@ def addPreviousPath(path):
 	if add_val:
 		ppath = ET.SubElement(SETTINGS_DATA, 'path_history')
 		ppath.text=path
+
+def removeLanguage(languagename):
+	if SETTINGS_DATA is not None:
+		languages = SETTINGS_DATA.findall("language[@name='"+languagename+"']")
+		if languages is not None:
+			SETTINGS_DATA.remove(languages[0])
+	write_settings_data()
+
 
 getSettings(None)
