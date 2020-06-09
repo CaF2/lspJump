@@ -126,13 +126,7 @@ class SettingsWindow(Gtk.Grid):
 		self.attach(label, 0, row_num, 2, 1)
 		row_num=row_num+1
 		
-		cb = Gtk.ComboBoxText()
-		cb.connect("changed", self._click_histoy_path)
-		path_histories = settings.SETTINGS_DATA.findall("path_history")
-		for ppath in path_histories:
-			if ppath.text is not None:
-				cb.append_text(ppath.text)
-		self.attach(cb, 0, row_num, 2, 1)
+		self.path_history_pos=row_num
 		row_num=row_num+1
 
 		self.path_entry=Gtk.Entry()
@@ -175,32 +169,47 @@ class SettingsWindow(Gtk.Grid):
 		self.attach(button_get_proj, 1, row_num, 1, 1)
 		row_num=row_num+1
 		
+		self._generate_path_history()
 		self._generate_language_combo()
 	def _generate_language_combo(self):
 		if hasattr(self,"lang_cb"):
 			self.lang_cb.destroy()
 		self.lang_cb = Gtk.ComboBoxText()
 		# cb.connect("changed", self.on_changed)
-		language_settings = settings.SETTINGS_DATA.findall("language")
-		index=0
-		choosen_index=0
-		for language_setting in language_settings:
-			lang_name = language_setting.get("name")
-			if lang_name is not None:
-				self.lang_cb.append_text(lang_name)
-				
-				if settings.SETTINGS_LANGUAGE is not None:
-					if lang_name==settings.SETTINGS_LANGUAGE.get("name"):
-						choosen_index=index
-				index=index+1
-		self.lang_cb.set_active(choosen_index)
+		if settings.SETTINGS_DATA is not None:
+			language_settings = settings.SETTINGS_DATA.findall("language")
+			index=0
+			choosen_index=0
+			for language_setting in language_settings:
+				lang_name = language_setting.get("name")
+				if lang_name is not None:
+					self.lang_cb.append_text(lang_name)
+					
+					if settings.SETTINGS_LANGUAGE is not None:
+						if lang_name==settings.SETTINGS_LANGUAGE.get("name"):
+							choosen_index=index
+					index=index+1
+			self.lang_cb.set_active(choosen_index)
 		self._set_language(None)
 		self.attach(self.lang_cb, 0, self.langugage_combo_pos, 2, 1)
 		self.lang_cb.show()
+	def _generate_path_history(self):
+		if hasattr(self,"path_history_cb"):
+			self.path_history_cb.destroy()
+		self.path_history_cb = Gtk.ComboBoxText()
+		self.path_history_cb.connect("changed", self._click_histoy_path)
+		if settings.SETTINGS_DATA is not None:
+			path_histories = settings.SETTINGS_DATA.findall("path_history")
+			for ppath in path_histories:
+				if ppath.text is not None:
+					self.path_history_cb.append_text(ppath.text)
+		self.attach(self.path_history_cb, 0, self.path_history_pos, 2, 1)
+		self.path_history_cb.show()
 	def _change_project_path(self, w):
 		new_path=self.path_entry.get_text()
 		print("Changed to: "+new_path)
 		settings.addPreviousPath(new_path)
+		self._generate_path_history()
 		
 		if settings.LSP_NAVIGATOR is not None:
 			settings.LSP_NAVIGATOR.lsp_endpoint.shutdown()
@@ -255,8 +264,9 @@ class SettingsWindow(Gtk.Grid):
 		self._generate_language_combo()
 	def _set_language(self, w):
 		profile_name=self.lang_cb.get_active_text()
-		print("Opening::"+profile_name)
-		settings.getSettings(profile_name)
+		if profile_name is not None:
+			print("Opening::"+profile_name)
+			settings.getSettings(profile_name)
 	def _get_proj(self, w):
 		this_file_obj=self.plugin.window.get_active_document()
 		this_file=this_file_obj.get_uri_for_display()

@@ -68,6 +68,7 @@ LSP_SETTINGS = """{
 		}"""
 
 PROJECT_PATH = ''
+MAX_SAVE_PATH = 20
 
 keyJumpDef = "F3"
 keyJumpRef = "F4"
@@ -177,15 +178,22 @@ def write_settings_data():
 
 def addPreviousPath(path):
 	global SETTINGS_DATA
+	global MAX_SAVE_PATH
+	if SETTINGS_DATA is None:
+		SETTINGS_DATA = ET.Element('data')
 	add_val=True
 	path_histories = SETTINGS_DATA.findall("path_history")
+
 	for ppath in path_histories:
 		if ppath.text is not None and ppath.text==path:
 			add_val=False
 			break
 	if add_val:
+		if len(path_histories)>MAX_SAVE_PATH:
+			SETTINGS_DATA.remove(path_histories[0])
 		ppath = ET.SubElement(SETTINGS_DATA, 'path_history')
 		ppath.text=path
+	write_settings_data()
 
 def removeLanguage(languagename):
 	if SETTINGS_DATA is not None:
