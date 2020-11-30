@@ -270,7 +270,7 @@ class LspNavigator:
 		read_pipe.start()
 		json_rpc_endpoint = JsonRpcEndpoint(self.process.stdin, self.process.stdout)
 		# To work with socket: sock_fd = sock.makefile()
-		method_callbacks={"workspace_configuration":workspace_configuration_function}
+		method_callbacks={"workspace_configuration":workspace_configuration_function,"window/workDoneProgress/create":workspace_configuration_function}
 
 		self.lsp_endpoint = LspEndpoint(json_rpc_endpoint,method_callbacks)
 
