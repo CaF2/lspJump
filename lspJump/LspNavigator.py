@@ -271,8 +271,9 @@ class LspNavigator:
 		json_rpc_endpoint = JsonRpcEndpoint(self.process.stdin, self.process.stdout)
 		# To work with socket: sock_fd = sock.makefile()
 		method_callbacks={"workspace_configuration":workspace_configuration_function,"window/workDoneProgress/create":workspace_configuration_function}
+		notify_callbacks={"$/progress":workspace_configuration_function}
 
-		self.lsp_endpoint = LspEndpoint(json_rpc_endpoint,method_callbacks)
+		self.lsp_endpoint = LspEndpoint(json_rpc_endpoint,method_callbacks,notify_callbacks)
 
 		# file_path = "/home/flev/dev/c++/qsound/sound.cpp"
 		
