@@ -158,9 +158,10 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 	def open_location(self, location, line):
 		for d in self.window.get_documents():
 			d_location = d.get_file()
+			doc_uri = d.get_file().get_location().get_path()
 			if not d_location:
 				continue
-			if os.path.realpath(location.get_path())==d.get_uri_for_display():
+			if os.path.realpath(location.get_path())==doc_uri:
 				tab = Gedit.Tab.get_from_document(d)
 				self.window.set_active_tab(tab)
 				d.goto_line(line - 1)

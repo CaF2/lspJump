@@ -269,7 +269,8 @@ class SettingsWindow(Gtk.Grid):
 			settings.getSettings(profile_name)
 	def _get_proj(self, w):
 		this_file_obj=self.plugin.window.get_active_document()
-		this_file=this_file_obj.get_uri_for_display()
+		#this_file=this_file_obj.get_uri_for_display()
+		this_file = this_file_obj.get_file().get_location().get_path()
 		print(os.path.dirname(this_file))
 		self.path_entry.set_text(os.path.dirname(this_file))
 	def _click_histoy_path(self, w):

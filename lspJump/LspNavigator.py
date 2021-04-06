@@ -287,7 +287,9 @@ class LspNavigator:
 	def getDefinitions(self, doc, identifier):
 #		realpath = os.path.realpath(doc.get_location().get_path())
 #		doc_path = os.path.dirname(realpath)
-		doc_uri = doc.get_uri_for_display()
+
+#		doc_uri = doc.get_uri_for_display()
+		doc_uri = doc.get_file().get_location().get_path()
 		
 		doc_curr_line=identifier.get_line()
 		doc_curr_offset=identifier.get_line_offset()
@@ -319,7 +321,8 @@ class LspNavigator:
 		except IndexError:
 			return None
 	def getReferences(self, doc, identifier):
-		doc_uri = doc.get_uri_for_display()
+#		doc_uri = doc.get_uri_for_display()
+		doc_uri = doc.get_file().get_location().get_path()
 		
 		doc_curr_line=identifier.get_line()
 		doc_curr_offset=identifier.get_line_offset()
