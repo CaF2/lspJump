@@ -164,8 +164,9 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			if os.path.realpath(location.get_path())==doc_uri:
 				tab = Gedit.Tab.get_from_document(d)
 				self.window.set_active_tab(tab)
-				d.goto_line(line - 1)
-				self.window.get_active_view().scroll_to_cursor()
+				piter=d.get_iter_at_line(line - 1)
+				d.place_cursor(piter)
+				self.window.get_active_view().scroll_to_iter(piter,0.25,False,0,0)
 				break
 		else:
 			# file has not opened yet
