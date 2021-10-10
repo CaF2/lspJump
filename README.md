@@ -39,7 +39,7 @@ Open gedit and do
 
 ## Note
 
-* To make the "compile_commands.json", you man use bear (https://github.com/rizsotto/Bear)
+* To make the "compile_commands.json", you may use bear (https://github.com/rizsotto/Bear)
 
 Example:
 
