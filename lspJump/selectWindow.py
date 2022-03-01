@@ -99,6 +99,13 @@ class LanguageSettings(Gtk.Dialog):
 		self.bin_entry.set_text(settings.LSP_BIN)
 		box.add(self.bin_entry)
 		
+		label=Gtk.Label("Path to an eventual file or folder that may indicate where to start the binary from:")
+		box.add(label)
+		
+		self.search_entry=Gtk.Entry()
+		self.search_entry.set_text(settings.LSP_SEARCH_PATH)
+		box.add(self.search_entry)
+		
 		label=Gtk.Label("Language settings:")
 		box.add(label)
 		
@@ -141,6 +148,10 @@ class SettingsWindow(Gtk.Grid):
 		button_get_proj = Gtk.Button(label="Get project dir")
 		button_get_proj.connect("clicked", self._get_proj)
 		self.attach(button_get_proj, 0, row_num, 1, 1)
+		
+		button_search_proj = Gtk.Button(label="Search project dir")
+		button_search_proj.connect("clicked", self._search_proj)
+		self.attach(button_search_proj, 1, row_num, 1, 1)
 		row_num=row_num+1
 		
 		label=Gtk.Label("Profiles")
@@ -223,7 +234,7 @@ class SettingsWindow(Gtk.Grid):
 		if response == Gtk.ResponseType.OK:
 			print(dialog.lang_name.get_text())
 			start,end=dialog.tbuffer.get_bounds()
-			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.tbuffer.get_text(start,end,False),False)
+			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.search_entry.get_text(),dialog.tbuffer.get_text(start,end,False),False)
 		# 	print("The OK button was clicked")
 		# elif response == Gtk.ResponseType.CANCEL:
 		# 	print("The Cancel button was clicked")
@@ -256,7 +267,7 @@ class SettingsWindow(Gtk.Grid):
 		if response == Gtk.ResponseType.OK:
 			print(dialog.lang_name.get_text())
 			start,end=dialog.tbuffer.get_bounds()
-			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.tbuffer.get_text(start,end,False),True)
+			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.search_entry.get_text(),dialog.tbuffer.get_text(start,end,False),True)
 			print("The OK button was clicked")
 		elif response == Gtk.ResponseType.CANCEL:
 			print("The Cancel button was clicked")
@@ -273,6 +284,22 @@ class SettingsWindow(Gtk.Grid):
 		this_file = this_file_obj.get_file().get_location().get_path()
 		print(os.path.dirname(this_file))
 		self.path_entry.set_text(os.path.dirname(this_file))
+	def _loop_folders_for_file(self,folder):
+		if os.path.dirname(folder) == folder:
+			return ""
+		else:
+			a = os.path.exists(folder+"/"+settings.LSP_SEARCH_PATH)
+			if a:
+				return folder
+			else:
+				return self._loop_folders_for_file(os.path.dirname(folder))
+	def _search_proj(self, w):
+		this_file_obj=self.plugin.window.get_active_document()
+		#this_file=this_file_obj.get_uri_for_display()
+		this_file = this_file_obj.get_file().get_location().get_path()
+		path=self._loop_folders_for_file(os.path.dirname(this_file))
+		print(path)
+		self.path_entry.set_text(path)
 	def _click_histoy_path(self, w):
 		npath=w.get_active_text()
 		self.path_entry.set_text(npath)
