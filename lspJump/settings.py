@@ -101,7 +101,7 @@ def getSettings(profilename):
 				if profilename is not None:
 					additional="[@name='"+profilename+"']"
 				languages = SETTINGS_DATA.findall("language"+additional)
-				if languages is not None:
+				if languages is not None and len(languages)>0:
 					SETTINGS_LANGUAGE=languages[0]
 					lsp_bins = SETTINGS_LANGUAGE.findall("lsp_bin")
 					if lsp_bins is not None and len(lsp_bins)>0:
