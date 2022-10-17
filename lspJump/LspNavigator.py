@@ -157,11 +157,12 @@ class LspEndpoint(threading.Thread):
 		self.shutdown_flag = False
 
 	def handle_result(self, rpc_id, result, error):
-		self.response_dict[rpc_id] = (result, error)
-		cond = self.event_dict[rpc_id]
-		cond.acquire()
-		cond.notify()
-		cond.release()
+		if rpc_id is not None:
+			self.response_dict[rpc_id] = (result, error)
+			cond = self.event_dict[rpc_id]
+			cond.acquire()
+			cond.notify()
+			cond.release()
 
 	def stop(self):
 		self.shutdown_flag = True
@@ -265,12 +266,22 @@ def workspace_configuration_function(params):
 
 class LspNavigator:
 	def __init__(self):
-		self.process = subprocess.Popen(settings.LSP_BIN.strip().split(" "), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		bin_arr=settings.LSP_BIN.strip().split(" ")
+		args_arr=settings.LSP_BIN_ARGS.strip().split(" ")
+		if len(args_arr[0])>0:
+			final_arr=bin_arr+args_arr
+		else:
+			final_arr=bin_arr
+		#print(bin_arr)
+		#print(args_arr)
+		print(final_arr)
+		
+		self.process = subprocess.Popen(final_arr, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		read_pipe = ReadPipe(self.process.stderr)
 		read_pipe.start()
 		json_rpc_endpoint = JsonRpcEndpoint(self.process.stdin, self.process.stdout)
 		# To work with socket: sock_fd = sock.makefile()
-		method_callbacks={"workspace_configuration":workspace_configuration_function,"window/workDoneProgress/create":workspace_configuration_function}
+		method_callbacks={"workspace_configuration":workspace_configuration_function,"workspace/configuration":workspace_configuration_function,"window/workDoneProgress/create":workspace_configuration_function}
 		notify_callbacks={"$/progress":workspace_configuration_function}
 
 		self.lsp_endpoint = LspEndpoint(json_rpc_endpoint,method_callbacks,notify_callbacks)

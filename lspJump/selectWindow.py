@@ -74,7 +74,7 @@ class ProjectDir(Gtk.Window):
 
 class LanguageSettings(Gtk.Dialog):
 	def __init__(self, parent,name,dialog_type):
-		Gtk.Dialog.__init__(self,"My Dialog",parent.get_toplevel(),0,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OK,Gtk.ResponseType.OK))
+		Gtk.Dialog.__init__(self,"Language settings",parent.get_toplevel(),0,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OK,Gtk.ResponseType.OK))
 		
 		box = self.get_content_area()
 		
@@ -99,7 +99,14 @@ class LanguageSettings(Gtk.Dialog):
 		self.bin_entry.set_text(settings.LSP_BIN)
 		box.add(self.bin_entry)
 		
-		label=Gtk.Label("Path to an eventual file or folder that may indicate where to start the binary from:")
+		label=Gtk.Label("Binary arguments (space separated)")
+		box.add(label)
+		
+		self.bin_args_entry=Gtk.Entry()
+		self.bin_args_entry.set_text(settings.LSP_BIN_ARGS)
+		box.add(self.bin_args_entry)
+		
+		label=Gtk.Label("Search path to an eventual file or folder that may indicate where to start the binary from:")
 		box.add(label)
 		
 		self.search_entry=Gtk.Entry()
@@ -234,7 +241,7 @@ class SettingsWindow(Gtk.Grid):
 		if response == Gtk.ResponseType.OK:
 			print(dialog.lang_name.get_text())
 			start,end=dialog.tbuffer.get_bounds()
-			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.search_entry.get_text(),dialog.tbuffer.get_text(start,end,False),False)
+			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.bin_args_entry.get_text(),dialog.search_entry.get_text(),dialog.tbuffer.get_text(start,end,False),False)
 		# 	print("The OK button was clicked")
 		# elif response == Gtk.ResponseType.CANCEL:
 		# 	print("The Cancel button was clicked")
@@ -267,7 +274,7 @@ class SettingsWindow(Gtk.Grid):
 		if response == Gtk.ResponseType.OK:
 			print(dialog.lang_name.get_text())
 			start,end=dialog.tbuffer.get_bounds()
-			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.search_entry.get_text(),dialog.tbuffer.get_text(start,end,False),True)
+			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.bin_args_entry.get_text(),dialog.search_entry.get_text(),dialog.tbuffer.get_text(start,end,False),True)
 			print("The OK button was clicked")
 		elif response == Gtk.ResponseType.CANCEL:
 			print("The Cancel button was clicked")

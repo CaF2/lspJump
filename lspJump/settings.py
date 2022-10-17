@@ -28,45 +28,46 @@ SETTINGS_LANGUAGE = None
 
 LSP_LANGUAGES = "c"
 LSP_BIN = "/usr/bin/ccls"
+LSP_BIN_ARGS = ""
 LSP_SEARCH_PATH = "compile_commands.json"
 LSP_SETTINGS = """{
-		"textDocument": {"codeAction": {"dynamicRegistration": true},
-		"codeLens": {"dynamicRegistration": true},
-		"colorProvider": {"dynamicRegistration": true},
-		"completion": {"completionItem": {"commitCharactersSupport": true,"documentationFormat": ["markdown", "plaintext"],"snippetSupport": true},
-		"completionItemKind": {"valueSet": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]},
-		"contextSupport": true,
-		"dynamicRegistration": true},
-		"definition": {"dynamicRegistration": true},
-		"documentHighlight": {"dynamicRegistration": true},
-		"documentLink": {"dynamicRegistration": true},
-		"documentSymbol": {"dynamicRegistration": true,
-		"symbolKind": {"valueSet": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]}},
-		"formatting": {"dynamicRegistration": true},
-		"hover": {"contentFormat": ["markdown", "plaintext"],
-		"dynamicRegistration": true},
-		"implementation": {"dynamicRegistration": true},
-		"onTypeFormatting": {"dynamicRegistration": true},
-		"publishDiagnostics": {"relatedInformation": true},
-		"rangeFormatting": {"dynamicRegistration": true},
-		"references": {"dynamicRegistration": true},
-		"rename": {"dynamicRegistration": true},
-		"signatureHelp": {"dynamicRegistration": true,
-		"signatureInformation": {"documentationFormat": ["markdown", "plaintext"]}},
-		"synchronization": {"didSave": true,
-		"dynamicRegistration": true,
-		"willSave": true,
-		"willSaveWaitUntil": true},
-		"typeDefinition": {"dynamicRegistration": true}},
-		"workspace": {"applyEdit": true,
-		"configuration": true,
-		"didChangeConfiguration": {"dynamicRegistration": true},
-		"didChangeWatchedFiles": {"dynamicRegistration": true},
-		"executeCommand": {"dynamicRegistration": true},
-		"symbol": {"dynamicRegistration": true,
-		"symbolKind": {"valueSet": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]}},"workspaceEdit": {"documentChanges": true},
-		"workspaceFolders": true}
-		}"""
+	"textDocument": {"codeAction": {"dynamicRegistration": true},
+	"codeLens": {"dynamicRegistration": true},
+	"colorProvider": {"dynamicRegistration": true},
+	"completion": {"completionItem": {"commitCharactersSupport": true,"documentationFormat": ["markdown", "plaintext"],"snippetSupport": true},
+	"completionItemKind": {"valueSet": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]},
+	"contextSupport": true,
+	"dynamicRegistration": true},
+	"definition": {"dynamicRegistration": true},
+	"documentHighlight": {"dynamicRegistration": true},
+	"documentLink": {"dynamicRegistration": true},
+	"documentSymbol": {"dynamicRegistration": true,
+	"symbolKind": {"valueSet": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]}},
+	"formatting": {"dynamicRegistration": true},
+	"hover": {"contentFormat": ["markdown", "plaintext"],
+	"dynamicRegistration": true},
+	"implementation": {"dynamicRegistration": true},
+	"onTypeFormatting": {"dynamicRegistration": true},
+	"publishDiagnostics": {"relatedInformation": true},
+	"rangeFormatting": {"dynamicRegistration": true},
+	"references": {"dynamicRegistration": true},
+	"rename": {"dynamicRegistration": true},
+	"signatureHelp": {"dynamicRegistration": true,
+	"signatureInformation": {"documentationFormat": ["markdown", "plaintext"]}},
+	"synchronization": {"didSave": true,
+	"dynamicRegistration": true,
+	"willSave": true,
+	"willSaveWaitUntil": true},
+	"typeDefinition": {"dynamicRegistration": true}},
+	"workspace": {"applyEdit": true,
+	"configuration": true,
+	"didChangeConfiguration": {"dynamicRegistration": true},
+	"didChangeWatchedFiles": {"dynamicRegistration": true},
+	"executeCommand": {"dynamicRegistration": true},
+	"symbol": {"dynamicRegistration": true,
+	"symbolKind": {"valueSet": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]}},"workspaceEdit": {"documentChanges": true},
+	"workspaceFolders": true}
+}"""
 
 PROJECT_PATH = ''
 MAX_SAVE_PATH = 20
@@ -83,8 +84,17 @@ LSP_NAVIGATOR=None
 
 #########
 
+def getValueFromSettings(obj,attr,def_val):
+	lsp_searchs = obj.findall(attr)
+	if lsp_searchs is not None and len(lsp_searchs)>0:
+		if lsp_searchs[0].text is not None and len(lsp_searchs[0].text)>0:
+			return lsp_searchs[0].text
+	return def_val
+
+
 def getSettings(profilename):
 	global LSP_BIN
+	global LSP_BIN_ARGS
 	global LSP_SEARCH_PATH
 	global LSP_SETTINGS
 	global LSP_LANGUAGES
@@ -103,32 +113,32 @@ def getSettings(profilename):
 				languages = SETTINGS_DATA.findall("language"+additional)
 				if languages is not None and len(languages)>0:
 					SETTINGS_LANGUAGE=languages[0]
-					lsp_bins = SETTINGS_LANGUAGE.findall("lsp_bin")
-					if lsp_bins is not None and len(lsp_bins)>0:
-						LSP_BIN = lsp_bins[0].text
-					lsp_searchs = SETTINGS_LANGUAGE.findall("lsp_search")
-					if lsp_searchs is not None and len(lsp_searchs)>0:
-						LSP_SEARCH_PATH = lsp_searchs[0].text
-					lsp_language = SETTINGS_LANGUAGE.findall("lsp_language")
-					if lsp_language is not None and len(lsp_language)>0:
-						LSP_LANGUAGES = lsp_language[0].text
-					lsp_settings = SETTINGS_LANGUAGE.findall("lsp_settings")
-					if lsp_settings is not None and len(lsp_settings)>0:
-						LSP_SETTINGS = lsp_settings[0].text
+					LSP_BIN = getValueFromSettings(SETTINGS_LANGUAGE,"lsp_bin","")
+					LSP_BIN_ARGS = getValueFromSettings(SETTINGS_LANGUAGE,"lsp_bin_args","")
+					LSP_SEARCH_PATH = getValueFromSettings(SETTINGS_LANGUAGE,"lsp_search","")
+					LSP_LANGUAGES = getValueFromSettings(SETTINGS_LANGUAGE,"lsp_language","")
+					LSP_SETTINGS = getValueFromSettings(SETTINGS_LANGUAGE,"lsp_settings","")
 
-def setLspConfiguration(name,language,path,search_file,settings,overwrite=True):
+def setLspConfiguration(name,language,path,args,search_file,settings,overwrite=True):
 	global LSP_BIN
+	global LSP_BIN_ARGS
 	global LSP_SEARCH_PATH
 	global LSP_SETTINGS
 	global LSP_LANGUAGES
 
 	global SETTINGS_DATA
 	global SETTINGS_LANGUAGE
-
-	LSP_BIN = path
-	LSP_SEARCH_PATH = search_file
-	LSP_SETTINGS = settings
-	LSP_LANGUAGES = language
+	
+	if path is not None and len(path)>0:
+		LSP_BIN = path
+	if args is not None and len(args)>0:
+		LSP_BIN_ARGS = args
+	if search_file is not None and len(search_file)>0:
+		LSP_SEARCH_PATH = search_file
+	if settings is not None and len(settings)>0:
+		LSP_SETTINGS = settings
+	if language is not None and len(language)>0:
+		LSP_LANGUAGES = language
 	
 	if SETTINGS_DATA is None:
 		SETTINGS_DATA = ET.Element('data')
@@ -137,6 +147,8 @@ def setLspConfiguration(name,language,path,search_file,settings,overwrite=True):
 	lsp_language=None
 	lsp_bin_exists=True
 	lsp_bin=None
+	lsp_bin_args_exists=True
+	lsp_bin_args=None
 	lsp_search_exists=True
 	lsp_search=None
 	lsp_settings_exists=True
@@ -154,10 +166,16 @@ def setLspConfiguration(name,language,path,search_file,settings,overwrite=True):
 			lsp_bin = lsp_pre_bin[0]
 		except IndexError:
 			lsp_bin_exists=False
-		
-		lsp_pre_bin=SETTINGS_LANGUAGE.findall("lsp_search")
+			
+		lsp_pre_bin_args=SETTINGS_LANGUAGE.findall("lsp_bin_args")
 		try:
-			lsp_search = lsp_pre_bin[0]
+			lsp_bin_args = lsp_pre_bin_args[0]
+		except IndexError:
+			lsp_bin_args_exists=False
+		
+		lsp_pre_search=SETTINGS_LANGUAGE.findall("lsp_search")
+		try:
+			lsp_search = lsp_pre_search[0]
 		except IndexError:
 			lsp_search_exists=False
 		
@@ -170,6 +188,7 @@ def setLspConfiguration(name,language,path,search_file,settings,overwrite=True):
 		SETTINGS_LANGUAGE = ET.SubElement(SETTINGS_DATA, 'language')
 		lsp_language_exists=False
 		lsp_bin_exists=False
+		lsp_bin_args_exists=False
 		lsp_search_exists=False
 		lsp_settings_exists=False
 	
@@ -181,6 +200,9 @@ def setLspConfiguration(name,language,path,search_file,settings,overwrite=True):
 	if lsp_bin_exists is False:
 		lsp_bin = ET.SubElement(SETTINGS_LANGUAGE, 'lsp_bin')
 	lsp_bin.text = LSP_BIN
+	if lsp_bin_args_exists is False:
+		lsp_bin_args = ET.SubElement(SETTINGS_LANGUAGE, 'lsp_bin_args')
+	lsp_bin_args.text = LSP_BIN_ARGS
 	if lsp_search_exists is False:
 		lsp_search = ET.SubElement(SETTINGS_LANGUAGE, 'lsp_search')
 	lsp_search.text = LSP_SEARCH_PATH
