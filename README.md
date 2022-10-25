@@ -44,10 +44,20 @@ Open gedit and do
 Example:
 
 ```
-bear make -B
+bear -- make -B
 ```
 
 * LSP communicates with the plugin using a pipe (->stdin), as a design decision it does not run by default.
+
+## Configuration
+
+The graphical menues should work, otherwise the configuration file for this plugin is located here: 
+
+```
+~/.local/share/gedit/plugins/lspJump/lspJumpsettings.xml
+```
+
+The first language mentioned is the default language
 
 ## Thanks to (based on):
 
