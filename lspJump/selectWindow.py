@@ -75,7 +75,6 @@ class ProjectDir(Gtk.Window):
 class LanguageSettings(Gtk.Dialog):
 	def __init__(self, parent,name,dialog_type):
 		Gtk.Dialog.__init__(self,"Language settings",parent.get_toplevel(),0,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OK,Gtk.ResponseType.OK))
-		
 		box = self.get_content_area()
 		
 		label=Gtk.Label("Profile name:")
@@ -168,23 +167,23 @@ class SettingsWindow(Gtk.Grid):
 		self.langugage_combo_pos=row_num
 		row_num=row_num+1
 
-		button_get_proj = Gtk.Button(label="New")
-		button_get_proj.connect("clicked", self._new_language)
-		self.attach(button_get_proj, 0, row_num, 1, 1)
-		
 		button_get_proj = Gtk.Button(label="Edit")
 		button_get_proj.connect("clicked", self._edit_language)
-		self.attach(button_get_proj, 1, row_num, 1, 1)
+		self.attach(button_get_proj, 0, row_num, 2, 1)
 		
 		row_num=row_num+1
 
-		button_get_proj = Gtk.Button(label="Remove")
-		button_get_proj.connect("clicked", self._remove_language)
+		button_get_proj = Gtk.Button(label="New")
+		button_get_proj.connect("clicked", self._new_language)
 		self.attach(button_get_proj, 0, row_num, 1, 1)
 
-		button_get_proj = Gtk.Button(label="Set")
-		button_get_proj.connect("clicked", self._set_language)
+		button_get_proj = Gtk.Button(label="Remove")
+		button_get_proj.connect("clicked", self._remove_language)
 		self.attach(button_get_proj, 1, row_num, 1, 1)
+
+		# button_get_proj = Gtk.Button(label="Set")
+		# button_get_proj.connect("clicked", self._set_language)
+		# self.attach(button_get_proj, 1, row_num, 1, 1)
 		row_num=row_num+1
 		
 		self._generate_path_history()
@@ -193,7 +192,7 @@ class SettingsWindow(Gtk.Grid):
 		if hasattr(self,"lang_cb"):
 			self.lang_cb.destroy()
 		self.lang_cb = Gtk.ComboBoxText()
-		# cb.connect("changed", self.on_changed)
+		self.lang_cb.connect("changed", self._set_language)
 		if settings.SETTINGS_DATA is not None:
 			language_settings = settings.SETTINGS_DATA.findall("language")
 			index=0
@@ -310,3 +309,4 @@ class SettingsWindow(Gtk.Grid):
 	def _click_histoy_path(self, w):
 		npath=w.get_active_text()
 		self.path_entry.set_text(npath)
+

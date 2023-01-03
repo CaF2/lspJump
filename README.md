@@ -8,12 +8,14 @@ GPLv3.0 See LICENSE.txt
 
 ## Requires
 
+This plugin also requires a language server for your programming language. These ones are currently verified to work (tested by me):
+
 * ccls (https://github.com/MaskRay/ccls) (C,C++,Objective-C)
 * pyls (https://github.com/palantir/python-language-server) (Python)
 
-Maybe other languages work? You can change in settings (F5) if you want to try another server.
+Other language servers could work. To see if your programming language have support from a language server check (https://microsoft.github.io/language-server-protocol/implementors/servers/) or search using a search engine. You can change in settings (F5) if you want to try another server.
 
-To change to another language, simply type something like "/usr/bin/pyls" in the settings.
+To change to another language, simply type something like "/usr/bin/pyls" in the settings. If it also requires some additional arguments add them in the "Binary arguments text box". There each argument is separated with a space.
 
 ## Installation
 
@@ -37,7 +39,12 @@ Open gedit and do
 * F3 (go to definition) and F4 (show references) should now work if you have clicked somewhere in your code
 * To go back press "alt+b", to go forwards press "alt+shift+b"
 
-## Note
+## What should work
+
+* Go to definition
+* Show references
+
+## Note for Makefile users
 
 * To make the "compile_commands.json", you may use bear (https://github.com/rizsotto/Bear)
 
