@@ -117,7 +117,7 @@ def getSettings(profilename):
 					LSP_BIN_ARGS = getValueFromSettings(SETTINGS_LANGUAGE,"lsp_bin_args","")
 					LSP_SEARCH_PATH = getValueFromSettings(SETTINGS_LANGUAGE,"lsp_search","")
 					LSP_LANGUAGES = getValueFromSettings(SETTINGS_LANGUAGE,"lsp_language","")
-					LSP_SETTINGS = getValueFromSettings(SETTINGS_LANGUAGE,"lsp_settings","")
+					LSP_SETTINGS = getValueFromSettings(SETTINGS_LANGUAGE,"lsp_settings","{}")
 
 def setLspConfiguration(name,language,path,args,search_file,settings,overwrite=True):
 	global LSP_BIN
