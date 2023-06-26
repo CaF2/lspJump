@@ -323,12 +323,39 @@ class LspNavigator:
 		def_s=self.lsp_endpoint.call_method("textDocument/definition", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
 		
 		try:
-			urlp = urllib.parse.urlparse(def_s[0]['uri'])
-			urlps = urllib.parse.unquote(os.path.abspath(os.path.join(urlp.netloc, urlp.path)))
-			print(def_s)
-			print("File:"+urlps+" From[Line:"+str(def_s[0]['range']['start']['line']+1)+" Character:"+str(def_s[0]['range']['start']['character'])+"]"+" To[Line:"+str(def_s[0]['range']['end']['line']+1)+" Character:"+str(def_s[0]['range']['end']['character'])+"]")
+			#{"jsonrpc": "2.0", "id": 10, "method": "textDocument/definition", "params": {"textDocument": {"uri": "file:///path.something"}, "position": {"line": 26, "character": 25}}}
+			#{"id":2,"jsonrpc":"2.0","result":[{"range":{"end":{"character":38,"line":575},"start":{"character":20,"line":575}},"uri":"file:///path.something"}]}
+			uri_path=""
+			find_line=0
+			find_char=0
+			find_end_line=0
+			find_end_char=0
+			found=False
 			
-			return [[urlps, int(def_s[0]['range']['start']['line'])+1, int(def_s[0]['range']['start']['character']), def_s[0]['uri']]]
+			print(def_s)
+			
+			if type(def_s) == list:
+				uri_path=def_s[0]['uri']
+				find_line=int(def_s[0]['range']['start']['line'])+1
+				find_char=int(def_s[0]['range']['start']['character'])
+				find_end_line=int(def_s[0]['range']['end']['line'])+1
+				find_end_char=int(def_s[0]['range']['end']['character'])
+				found=True
+			else:
+				uri_path=def_s['uri']
+				find_line=int(def_s['range']['start']['line'])+1
+				find_char=int(def_s['range']['start']['character'])
+				find_end_line=int(def_s['range']['end']['line'])+1
+				find_end_char=int(def_s['range']['end']['character'])
+				found=True
+			
+			if found:
+				urlp = urllib.parse.urlparse(uri_path)
+				urlps = urllib.parse.unquote(os.path.abspath(os.path.join(urlp.netloc, urlp.path)))
+				print("File:"+urlps+" From[Line:"+str(find_line)+" Character:"+str(find_char)+"]"+" To[Line:"+str(find_end_line)+" Character:"+str(find_end_char)+"]")
+				return [[urlps, find_line, find_char, uri_path]]
+			else:
+				return None
 		except IndexError:
 			return None
 	def getReferences(self, doc, identifier):
