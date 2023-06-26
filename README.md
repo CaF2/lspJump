@@ -12,6 +12,7 @@ This plugin also requires a language server for your programming language. These
 
 * ccls (https://github.com/MaskRay/ccls) (C,C++,Objective-C)
 * pyls (https://github.com/palantir/python-language-server) (Python)
+* For other examples, see lspjumpsettings.xml.template
 
 Other language servers could work. To see if your programming language have support from a language server check (https://microsoft.github.io/language-server-protocol/implementors/servers/) or search using a search engine. You can change in settings (F5) if you want to try another server.
 
