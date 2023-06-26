@@ -231,7 +231,6 @@
 		</lsp_settings>
 		<lsp_bin_args>--lsp-server</lsp_bin_args>
 	</language>
-	<!-- I think this works a bit better -->
 	<language name="Markdown">
 		<lsp_language>markdown</lsp_language>
 		<lsp_bin>/usr/bin/marksman</lsp_bin>
