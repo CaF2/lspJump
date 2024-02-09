@@ -106,7 +106,7 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			return
 		self.add_history(self.nextstack)
 		gio_file = Gio.File.new_for_path(preLocation[0].get_location().get_path())
-		self.open_location(gio_file, preLocation[1])
+		self.open_location(gio_file, preLocation[1], preLocation[2])
 	
 	def __next(self, action, dummy):
 		try:
@@ -115,7 +115,7 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			return
 		self.add_history(self.backstack)
 		gio_file = Gio.File.new_for_path(nextLocation[0].get_location().get_path())
-		self.open_location(gio_file, nextLocation[1])
+		self.open_location(gio_file, nextLocation[1], nextLocation[2])
 	
 	def __projdir(self, action, dummy):
 		window = selectWindow.ProjectDir(self)
@@ -137,7 +137,7 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 				dirname = os.path.dirname(doc_path)
 				newpath = os.path.normpath(os.path.join(dirname, path))
 				gio_file = Gio.File.new_for_path(newpath)
-			self.open_location(gio_file, line)
+			self.open_location(gio_file, line, code)
 	
 		if len(locations) == 1:
 			location_opener(locations[0])
@@ -155,7 +155,7 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 		if len(stack) == settings.historymax:
 			stack.popleft()
 
-	def open_location(self, location, line):
+	def open_location(self, location, line, column):
 		for d in self.window.get_documents():
 			d_location = d.get_file()
 			doc_uri = d.get_file().get_location().get_path()
@@ -168,8 +168,10 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 				d.place_cursor(piter)
 				self.window.get_active_view().scroll_to_iter(piter,0.25,False,0,0)
 				break
-		else:
-			# file has not opened yet
-			self.window.create_tab_from_location(
-				location, None, line, 0, False, True
-			)
+			else:
+				# file has not opened yet
+				# self.window.create_tab_from_location(
+				# 	location, None, line, 0, False, True
+				# )
+				tab=self.window.create_tab(True)
+				tab.load_file(location, None, line, column, False)

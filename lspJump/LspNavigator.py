@@ -337,16 +337,16 @@ class LspNavigator:
 			if type(def_s) == list:
 				uri_path=def_s[0]['uri']
 				find_line=int(def_s[0]['range']['start']['line'])+1
-				find_char=int(def_s[0]['range']['start']['character'])
+				find_char=int(def_s[0]['range']['start']['character'])+1
 				find_end_line=int(def_s[0]['range']['end']['line'])+1
-				find_end_char=int(def_s[0]['range']['end']['character'])
+				find_end_char=int(def_s[0]['range']['end']['character'])+1
 				found=True
 			else:
 				uri_path=def_s['uri']
 				find_line=int(def_s['range']['start']['line'])+1
-				find_char=int(def_s['range']['start']['character'])
+				find_char=int(def_s['range']['start']['character'])+1
 				find_end_line=int(def_s['range']['end']['line'])+1
-				find_end_char=int(def_s['range']['end']['character'])
+				find_end_char=int(def_s['range']['end']['character'])+1
 				found=True
 			
 			if found:
