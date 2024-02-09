@@ -44,6 +44,7 @@ Open gedit and do
 
 * Go to definition
 * Show references
+* Hover to see information
 
 ## Note for Makefile users
 
