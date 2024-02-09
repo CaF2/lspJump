@@ -18,7 +18,7 @@ from collections import deque
 from subprocess import CalledProcessError
 import os
 
-from gi.repository import GObject, Gedit, Gio
+from gi.repository import GObject, Gedit, Gio, Gtk
 from gi.repository import PeasGtk
 
 from lspJump import selectWindow, settings
@@ -73,7 +73,8 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			action = Gio.SimpleAction(name=name)
 			action.connect('activate', slots[name])
 			self.window.add_action(action)
-
+		self.window.connect('active-tab-changed', self.on_tab_changed)
+	
 	def do_deactivate(self):
 		for name, title, key in ACTION_DEFS:
 			self.window.remove_action(name)
@@ -81,6 +82,37 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 	def do_update_state(self):
 		pass
 
+	def on_tab_changed(self, window, tab):
+		if tab:
+			text_view = self.window.get_active_view()
+			if text_view:
+				text_view.connect('query-tooltip', self.on_motion_notify_event)
+				text_view.set_has_tooltip(True)
+				# text_view.set_tooltip_text("Tooltip")
+
+	def on_motion_notify_event(self, textview, x, y, keyboard_mode, tooltip):
+		additional=""
+		
+		if settings.LSP_NAVIGATOR is not None:
+			doc = self.window.get_active_document()
+			buffer_coords = textview.window_to_buffer_coords(Gtk.TextWindowType.WIDGET, x, y)
+			[obj,identifier] = textview.get_iter_at_location(buffer_coords[0], buffer_coords[1])
+			refs = settings.LSP_NAVIGATOR.getHover(doc, identifier)
+			if refs["contents"] is not None:
+				for c_obj in refs["contents"]:
+					if len(additional)>0:
+						additional=additional+"\n======\n"
+					
+					if type(c_obj) == str:
+						additional= additional+c_obj
+					else:
+						additional= additional+c_obj["value"]
+		if len(additional)>0:
+			tooltip.set_text(additional)
+			return True
+		else:
+			return False
+		
 	
 	def do_create_configure_widget(self):
 		return selectWindow.SettingsWindow(self);
@@ -150,7 +182,8 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 		doc = self.window.get_active_document()
 		stack.append((
 			doc.get_file(),
-			doc.get_iter_at_mark(doc.get_insert()).get_line() + 1
+			doc.get_iter_at_mark(doc.get_insert()).get_line() + 1,
+			doc.get_iter_at_mark(doc.get_insert()).get_line_offset() + 1
 		))
 		if len(stack) == settings.historymax:
 			stack.popleft()
@@ -169,12 +202,11 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 				d.place_cursor(piter)
 				self.window.get_active_view().scroll_to_iter(piter,0.25,False,0,0)
 				break
-			else:
-				# file has not opened yet
-				# self.window.create_tab_from_location(
-				# 	location, None, line, 0, False, True
-				# )
-				tab=self.window.create_tab(True)
-				tab.load_file(location, None, line, column, False)
-				
+		else:
+			# file has not opened yet
+			# self.window.create_tab_from_location(
+			# 	location, None, line, 0, False, True
+			# )
+			tab=self.window.create_tab(True)
+			tab.load_file(location, None, line, column, False)
 
