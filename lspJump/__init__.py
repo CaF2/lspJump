@@ -164,7 +164,8 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			if os.path.realpath(location.get_path())==doc_uri:
 				tab = Gedit.Tab.get_from_document(d)
 				self.window.set_active_tab(tab)
-				piter=d.get_iter_at_line(line - 1)
+				# piter=d.get_iter_at_line(line - 1)
+				piter=d.get_iter_at_line_index(line - 1,column - 1)
 				d.place_cursor(piter)
 				self.window.get_active_view().scroll_to_iter(piter,0.25,False,0,0)
 				break
@@ -175,3 +176,5 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 				# )
 				tab=self.window.create_tab(True)
 				tab.load_file(location, None, line, column, False)
+				
+
