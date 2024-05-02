@@ -93,7 +93,7 @@ class JsonRpcEndpoint(object):
 		jsonrpc_req = self.__add_header(json_string)
 		with self.write_lock:
 			write_data=jsonrpc_req.encode()
-			print("OUT::"+str(write_data))
+			settings.debugprint("OUT::"+str(write_data))
 			self.stdin.write(write_data)
 			self.stdin.flush()
 
@@ -129,7 +129,7 @@ class JsonRpcEndpoint(object):
 
 			jsonrpc_res = self.stdout.read(message_size).decode("utf-8")
 			
-			print("IN::"+jsonrpc_res)
+			settings.debugprint("IN::"+jsonrpc_res)
 			return json.loads(jsonrpc_res)
 
 def to_type(o, new_type):
@@ -172,7 +172,7 @@ class LspEndpoint(threading.Thread):
 			try:
 				jsonrpc_message = self.json_rpc_endpoint.recv_response()
 				if jsonrpc_message is None:
-					print("server quit")
+					settings.debugprint("server quit")
 					break
 				method = jsonrpc_message.get("method")
 				result = jsonrpc_message.get("result")
@@ -191,7 +191,7 @@ class LspEndpoint(threading.Thread):
 						# a call for notify
 						if method not in self.notify_callbacks:
 							# Have nothing to do with this.
-							print("Notify method not found: {method}.".format(method=method))
+							settings.debugprint("Notify method not found: {method}.".format(method=method))
 						else:
 							self.notify_callbacks[method](params)
 				else:
@@ -258,11 +258,11 @@ class ReadPipe(threading.Thread):
 	def run(self):
 		line = self.pipe.readline().decode('utf-8')
 		while line:
-			print(line)
+			settings.debugprint(line)
 			line = self.pipe.readline().decode('utf-8')
 
 def workspace_configuration_function(params):
-	print(params)
+	settings.debugprint(params)
 
 class LspNavigator:
 	def __init__(self):
@@ -272,9 +272,7 @@ class LspNavigator:
 			final_arr=bin_arr+args_arr
 		else:
 			final_arr=bin_arr
-		#print(bin_arr)
-		#print(args_arr)
-		print(final_arr)
+		settings.debugprint(final_arr)
 		
 		self.process = subprocess.Popen(final_arr, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		read_pipe = ReadPipe(self.process.stderr)
@@ -305,11 +303,11 @@ class LspNavigator:
 		doc_curr_line=identifier.get_line()
 		doc_curr_offset=identifier.get_line_offset()
 		
-		print("DOC1::")
-		print(doc)
-		print("identifier::")
-		print(identifier)
-		print("Line::"+str(doc_curr_line)+" Offset::"+str(doc_curr_offset)+" File:"+doc_uri)
+		settings.debugprint("DOC1::")
+		settings.debugprint(doc)
+		settings.debugprint("identifier::")
+		settings.debugprint(identifier)
+		settings.debugprint("Line::"+str(doc_curr_line)+" Offset::"+str(doc_curr_offset)+" File:"+doc_uri)
 #		yield from self._call_global(doc, identifier, '-x')
 
 		uri = "file://" + doc_uri
@@ -332,7 +330,7 @@ class LspNavigator:
 			find_end_char=0
 			found=False
 			
-			print(def_s)
+			settings.debugprint(def_s)
 			
 			if type(def_s) == list:
 				uri_path=def_s[0]['uri']
@@ -352,7 +350,7 @@ class LspNavigator:
 			if found:
 				urlp = urllib.parse.urlparse(uri_path)
 				urlps = urllib.parse.unquote(os.path.abspath(os.path.join(urlp.netloc, urlp.path)))
-				print("File:"+urlps+" From[Line:"+str(find_line)+" Character:"+str(find_char)+"]"+" To[Line:"+str(find_end_line)+" Character:"+str(find_end_char)+"]")
+				settings.debugprint("File:"+urlps+" From[Line:"+str(find_line)+" Character:"+str(find_char)+"]"+" To[Line:"+str(find_end_line)+" Character:"+str(find_end_char)+"]")
 				return [[urlps, find_line, find_char, uri_path]]
 			else:
 				return None
@@ -379,8 +377,8 @@ class LspNavigator:
 		for def_itr in def_s:
 			urlp = urllib.parse.urlparse(def_itr['uri'])
 			urlps = urllib.parse.unquote(os.path.abspath(os.path.join(urlp.netloc, urlp.path)))
-			# print(def_s)
-			# print("File:"+urlps+" From[Line:"+str(def_s[0]['range']['start']['line']+1)+" Character:"+str(def_s[0]['range']['start']['character'])+"]"+" To[Line:"+str(def_s[0]['range']['end']['line']+1)+" Character:"+str(def_s[0]['range']['end']['character'])+"]")
+			# settings.debugprint(def_s)
+			# settings.debugprint("File:"+urlps+" From[Line:"+str(def_s[0]['range']['start']['line']+1)+" Character:"+str(def_s[0]['range']['start']['character'])+"]"+" To[Line:"+str(def_s[0]['range']['end']['line']+1)+" Character:"+str(def_s[0]['range']['end']['character'])+"]")
 			retval.append([urlps, int(def_itr['range']['start']['line'])+1, int(def_itr['range']['start']['character']), def_itr['uri']])
 			
 		return retval

@@ -82,13 +82,12 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 	def do_update_state(self):
 		pass
 
-	def on_tab_changed(self, window, tab):
-		if tab:
-			text_view = self.window.get_active_view()
-			if text_view:
-				text_view.connect('query-tooltip', self.on_motion_notify_event)
-				text_view.set_has_tooltip(True)
-				# text_view.set_tooltip_text("Tooltip")
+	def on_tab_changed(self, window):
+		text_view = self.window.get_active_view()
+		if text_view:
+			text_view.connect('query-tooltip', self.on_motion_notify_event)
+			text_view.set_has_tooltip(True)
+			# text_view.set_tooltip_text("Tooltip")
 
 	def on_motion_notify_event(self, textview, x, y, keyboard_mode, tooltip):
 		additional=""
@@ -97,16 +96,18 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			doc = self.window.get_active_document()
 			buffer_coords = textview.window_to_buffer_coords(Gtk.TextWindowType.WIDGET, x, y)
 			[obj,identifier] = textview.get_iter_at_location(buffer_coords[0], buffer_coords[1])
-			refs = settings.LSP_NAVIGATOR.getHover(doc, identifier)
-			if refs["contents"] is not None:
-				for c_obj in refs["contents"]:
-					if len(additional)>0:
-						additional=additional+"\n======\n"
-					
-					if type(c_obj) == str:
-						additional= additional+c_obj
-					else:
-						additional= additional+c_obj["value"]
+			marked_char=identifier.get_char()
+			if marked_char!=' ' and marked_char!='\t':
+				refs = settings.LSP_NAVIGATOR.getHover(doc, identifier)
+				if refs["contents"] is not None:
+					for c_obj in refs["contents"]:
+						if len(additional)>0:
+							additional=additional+"\n======\n"
+						
+						if type(c_obj) == str:
+							additional= additional+c_obj
+						else:
+							additional= additional+c_obj["value"]
 		if len(additional)>0:
 			tooltip.set_text(additional)
 			return True

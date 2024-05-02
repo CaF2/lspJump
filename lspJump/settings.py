@@ -82,6 +82,8 @@ historymax = 100
 
 LSP_NAVIGATOR=None
 
+DEBUG = os.getenv("DEBUG", "").lower() in ["true", "1"]
+
 #########
 
 def getValueFromSettings(obj,attr,def_val):
@@ -243,5 +245,8 @@ def removeLanguage(languagename):
 			SETTINGS_DATA.remove(languages[0])
 	write_settings_data()
 
+def debugprint(msg):
+	if DEBUG:
+		print(msg)
 
 getSettings(None)

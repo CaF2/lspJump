@@ -224,7 +224,7 @@ class SettingsWindow(Gtk.Grid):
 		self.path_history_cb.show()
 	def _change_project_path(self, w):
 		new_path=self.path_entry.get_text()
-		print("Changed to: "+new_path)
+		settings.debugprint("Changed to: "+new_path)
 		settings.addPreviousPath(new_path)
 		self._generate_path_history()
 		
@@ -238,12 +238,12 @@ class SettingsWindow(Gtk.Grid):
 		dialog=LanguageSettings(self,"",False)
 		response=dialog.run()
 		if response == Gtk.ResponseType.OK:
-			print(dialog.lang_name.get_text())
+			settings.debugprint(dialog.lang_name.get_text())
 			start,end=dialog.tbuffer.get_bounds()
 			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.bin_args_entry.get_text(),dialog.search_entry.get_text(),dialog.tbuffer.get_text(start,end,False),False)
-		# 	print("The OK button was clicked")
+		# 	settings.debugprint("The OK button was clicked")
 		# elif response == Gtk.ResponseType.CANCEL:
-		# 	print("The Cancel button was clicked")
+		# 	settings.debugprint("The Cancel button was clicked")
 		dialog.destroy()
 		self._generate_language_combo()
 	def _remove_language(self, w):
@@ -258,37 +258,37 @@ class SettingsWindow(Gtk.Grid):
 		# dialog.format_secondary_text("And this is the secondary text that explains things.")
 		response = dialog.run()
 		if response == Gtk.ResponseType.YES:
-			print("QUESTION dialog closed by clicking YES button")
+			settings.debugprint("QUESTION dialog closed by clicking YES button")
 			settings.removeLanguage(profile_name)
 		elif response == Gtk.ResponseType.NO:
-			print("QUESTION dialog closed by clicking NO button")
+			settings.debugprint("QUESTION dialog closed by clicking NO button")
 		dialog.destroy()
 		self._generate_language_combo()
 	def _edit_language(self, w):
 		profile_name=self.lang_cb.get_active_text()
-		print("Editing::"+profile_name)
+		settings.debugprint("Editing::"+profile_name)
 		settings.getSettings(profile_name)
 		dialog=LanguageSettings(self,profile_name,False)
 		response=dialog.run()
 		if response == Gtk.ResponseType.OK:
-			print(dialog.lang_name.get_text())
+			settings.debugprint(dialog.lang_name.get_text())
 			start,end=dialog.tbuffer.get_bounds()
 			settings.setLspConfiguration(dialog.name.get_text(),dialog.lang_name.get_text(),dialog.bin_entry.get_text(),dialog.bin_args_entry.get_text(),dialog.search_entry.get_text(),dialog.tbuffer.get_text(start,end,False),True)
-			print("The OK button was clicked")
+			settings.debugprint("The OK button was clicked")
 		elif response == Gtk.ResponseType.CANCEL:
-			print("The Cancel button was clicked")
+			settings.debugprint("The Cancel button was clicked")
 		dialog.destroy()
 		self._generate_language_combo()
 	def _set_language(self, w):
 		profile_name=self.lang_cb.get_active_text()
 		if profile_name is not None:
-			print("Opening::"+profile_name)
+			settings.debugprint("Opening::"+profile_name)
 			settings.getSettings(profile_name)
 	def _get_proj(self, w):
 		this_file_obj=self.plugin.window.get_active_document()
 		#this_file=this_file_obj.get_uri_for_display()
 		this_file = this_file_obj.get_file().get_location().get_path()
-		print(os.path.dirname(this_file))
+		settings.debugprint(os.path.dirname(this_file))
 		self.path_entry.set_text(os.path.dirname(this_file))
 	def _loop_folders_for_file(self,folder):
 		if os.path.dirname(folder) == folder:
@@ -304,7 +304,7 @@ class SettingsWindow(Gtk.Grid):
 		#this_file=this_file_obj.get_uri_for_display()
 		this_file = this_file_obj.get_file().get_location().get_path()
 		path=self._loop_folders_for_file(os.path.dirname(this_file))
-		print(path)
+		settings.debugprint(path)
 		self.path_entry.set_text(path)
 	def _click_histoy_path(self, w):
 		npath=w.get_active_text()
