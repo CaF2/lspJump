@@ -45,7 +45,7 @@ Open gedit and do
 * Go to definition
 * Show references
 * Hover to see information
-* Tab completion is under development
+* Tab completion is in development, to see progress set the environment variable DEVELOP_FEATURES=true
 
 ## Note for Makefile users
 
