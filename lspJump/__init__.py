@@ -45,7 +45,7 @@ class lspJumpAppActivatable(GObject.Object, Gedit.AppActivatable):
 		for name, title, key in ACTION_DEFS:
 			accelerator = "win." + name
 			self.app.add_accelerator(key, accelerator, None)
-			item = Gio.MenuItem.new(_(title), accelerator)
+			item = Gio.MenuItem.new(_(title)+" ("+key+")", accelerator)
 			self.menu_ext.append_menu_item(item)
 
 	def do_deactivate(self):
@@ -86,9 +86,80 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 		text_view = self.window.get_active_view()
 		if text_view:
 			text_view.connect('query-tooltip', self.on_motion_notify_event)
+			if settings.DEVELOP_FEATURES:
+				text_view.connect('key-press-event', self.on_tab_added)
 			text_view.set_has_tooltip(True)
 			# text_view.set_tooltip_text("Tooltip")
 
+	def on_tab_added(self, widget, event):
+		if event.keyval == 65289: # 65289 is the keyval for Tab
+			print("Tab key pressed")
+			
+			doc = self.window.get_active_document()
+			# x, y = widget.get_pointer()
+			# buffer_coords = widget.window_to_buffer_coords(Gtk.TextWindowType.WIDGET, x, y)
+			buffer = widget.get_buffer()
+			mark = buffer.get_insert()
+			identifier = buffer.get_iter_at_mark(mark)
+			# [obj,identifier] = widget.get_iter_at_location(buffer_coords[0], buffer_coords[1])
+			marked_char=identifier.get_char()
+			if marked_char!=' ' and marked_char!='\t':
+				refs = settings.LSP_NAVIGATOR.getSuggestions(doc, identifier)
+				items=refs['items']
+				if len(items)>0:
+					return self.show_suggestions(items,widget)
+		return False
+	
+	def show_suggestions(self, suggestions, text_view):
+		# Logic to display suggestions
+		dialog = Gtk.Dialog("Suggestions",self.window.get_toplevel(),0,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OK,Gtk.ResponseType.OK))
+		dialog.set_default_size(600, 200)
+		# box = dialog.get_content_area()
+		
+		scrolled_window = Gtk.ScrolledWindow()
+		scrolled_window.set_border_width(10)
+		# box.add(scrolled_window)
+		dialog.vbox.pack_start(scrolled_window, True, True, 0)
+		
+		listbox = Gtk.ListBox()
+		scrolled_window.add(listbox)
+		
+		for suggestion in suggestions:
+			print(suggestion)
+			if "filterText" in suggestion:
+				suggestion_btn = Gtk.Button(label=suggestion["filterText"])
+				suggestion_btn.suggestion=suggestion
+				suggestion_btn.text_view=text_view
+				suggestion_btn.dialog=dialog
+				suggestion_btn.connect("clicked", self.change_to_suggestion)
+				listbox.add(suggestion_btn)
+		dialog.show_all()
+		
+		# dialog.format_secondary_text("\n".join(suggestions))
+		dialog.run()
+		dialog.destroy()
+		return True
+	
+	def replace_text(self, textview, start_line, start_column, end_line, end_column, new_text):
+		buffer = textview.get_buffer()
+		start_iter = buffer.get_iter_at_line_index(start_line, start_column)
+		end_iter = buffer.get_iter_at_line_index(end_line, end_column)
+		buffer.delete(start_iter, end_iter)
+		buffer.insert(start_iter, new_text)
+	
+	def change_to_suggestion(self, widget):
+		suggestion=widget.suggestion
+		text_view=widget.text_view
+		print("SUGGESTION")
+		print(suggestion)
+		start_line=suggestion["textEdit"]["range"]["start"]["line"]
+		start_character=suggestion["textEdit"]["range"]["start"]["character"]
+		end_line=suggestion["textEdit"]["range"]["end"]["line"]
+		#add one for the added tab
+		end_character=suggestion["textEdit"]["range"]["end"]["character"]
+		text_replacement=suggestion["textEdit"]["newText"]
+		self.replace_text(text_view,start_line, start_character, end_line, end_character, text_replacement)
+		widget.dialog.destroy()
 	def on_motion_notify_event(self, textview, x, y, keyboard_mode, tooltip):
 		additional=""
 		
@@ -99,11 +170,13 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			marked_char=identifier.get_char()
 			if marked_char!=' ' and marked_char!='\t':
 				refs = settings.LSP_NAVIGATOR.getHover(doc, identifier)
+				if refs is None:
+					#"query-tooltip"
+					textview.disconnect_by_func(self.on_motion_notify_event)
 				if refs["contents"] is not None:
 					for c_obj in refs["contents"]:
 						if len(additional)>0:
 							additional=additional+"\n======\n"
-						
 						if type(c_obj) == str:
 							additional= additional+c_obj
 						else:

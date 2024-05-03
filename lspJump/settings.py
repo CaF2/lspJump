@@ -74,8 +74,8 @@ MAX_SAVE_PATH = 20
 
 keyJumpDef = "F3"
 keyJumpRef = "F4"
-keyJumpBack = "<Alt>b"
-keyJumpNext = "<Alt><Shift>b"
+keyJumpBack = "<Alt>u"
+keyJumpNext = "<Alt><Shift>u"
 keyProjDir = "F5"
 
 historymax = 100
@@ -83,6 +83,7 @@ historymax = 100
 LSP_NAVIGATOR=None
 
 DEBUG = os.getenv("DEBUG", "").lower() in ["true", "1"]
+DEVELOP_FEATURES = os.getenv("DEVELOP_FEATURES", "").lower() in ["true", "1"]
 
 #########
 

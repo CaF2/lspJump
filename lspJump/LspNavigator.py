@@ -398,7 +398,32 @@ class LspNavigator:
 		text_doc={"uri":uri, "languageId":languageId, "version":version, "text":text}
 		result=self.lsp_endpoint.send_notification("textDocument/didOpen", textDocument=text_doc)
 		
-		def_s=self.lsp_endpoint.call_method("textDocument/hover", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
+		try:
+			def_s=self.lsp_endpoint.call_method("textDocument/hover", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
+		except Exception as e:
+			print("An error occurred:", e)
+			def_s=None
+			
+		return def_s
+	
+	def getSuggestions(self, doc, identifier):
+#		doc_uri = doc.get_uri_for_display()
+		doc_uri = doc.get_file().get_location().get_path()
+		
+		doc_curr_line=identifier.get_line()
+		doc_curr_offset=identifier.get_line_offset()
+
+		uri = "file://" + doc_uri
+		text = open(doc_uri, "r").read()
+		languageId = settings.LSP_LANGUAGES
+		version = 1
+		
+		text_doc={"uri":uri, "languageId":languageId, "version":version, "text":text}
+		result=self.lsp_endpoint.send_notification("textDocument/didOpen", textDocument=text_doc)
+		
+		print("line:"+str(doc_curr_line)+" character:"+str(doc_curr_offset))
+		
+		def_s=self.lsp_endpoint.call_method("textDocument/completion", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
 		
 		return def_s
 
