@@ -294,97 +294,99 @@ class LspNavigator:
 		self._initialize_project_path(settings.PROJECT_PATH)
 		
 	def getDefinitions(self, doc, identifier):
-#		realpath = os.path.realpath(doc.get_location().get_path())
-#		doc_path = os.path.dirname(realpath)
+		doctype=settings.get_document_programming_language_type(doc)
+		is_supported=settings.get_if_supported_language_type(doctype,True)
+		if is_supported:
+			doc_uri = doc.get_file().get_location().get_path()
+			
+			doc_curr_line=identifier.get_line()
+			doc_curr_offset=identifier.get_line_offset()
+			
+			settings.debugprint("DOC1::")
+			settings.debugprint(doc)
+			settings.debugprint("identifier::")
+			settings.debugprint(identifier)
+			settings.debugprint("Line::"+str(doc_curr_line)+" Offset::"+str(doc_curr_offset)+" File:"+doc_uri)
+	#		yield from self._call_global(doc, identifier, '-x')
 
-#		doc_uri = doc.get_uri_for_display()
-		doc_uri = doc.get_file().get_location().get_path()
-		
-		doc_curr_line=identifier.get_line()
-		doc_curr_offset=identifier.get_line_offset()
-		
-		settings.debugprint("DOC1::")
-		settings.debugprint(doc)
-		settings.debugprint("identifier::")
-		settings.debugprint(identifier)
-		settings.debugprint("Line::"+str(doc_curr_line)+" Offset::"+str(doc_curr_offset)+" File:"+doc_uri)
-#		yield from self._call_global(doc, identifier, '-x')
-
-		uri = "file://" + doc_uri
-		text = open(doc_uri, "r").read()
-		languageId = settings.LSP_LANGUAGES
-		version = 1
-		
-		text_doc={"uri":uri, "languageId":languageId, "version":version, "text":text}
-		result=self.lsp_endpoint.send_notification("textDocument/didOpen", textDocument=text_doc)
-		
-		def_s=self.lsp_endpoint.call_method("textDocument/definition", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
-		
-		try:
-			#{"jsonrpc": "2.0", "id": 10, "method": "textDocument/definition", "params": {"textDocument": {"uri": "file:///path.something"}, "position": {"line": 26, "character": 25}}}
-			#{"id":2,"jsonrpc":"2.0","result":[{"range":{"end":{"character":38,"line":575},"start":{"character":20,"line":575}},"uri":"file:///path.something"}]}
-			uri_path=""
-			find_line=0
-			find_char=0
-			find_end_line=0
-			find_end_char=0
-			found=False
+			uri = "file://" + doc_uri
+			text = open(doc_uri, "r").read()
+			languageId = doctype
+			version = 1
 			
-			settings.debugprint(def_s)
+			text_doc={"uri":uri, "languageId":languageId, "version":version, "text":text}
+			result=self.lsp_endpoint.send_notification("textDocument/didOpen", textDocument=text_doc)
 			
-			if type(def_s) == list:
-				uri_path=def_s[0]['uri']
-				find_line=int(def_s[0]['range']['start']['line'])+1
-				find_char=int(def_s[0]['range']['start']['character'])+1
-				find_end_line=int(def_s[0]['range']['end']['line'])+1
-				find_end_char=int(def_s[0]['range']['end']['character'])+1
-				found=True
-			else:
-				uri_path=def_s['uri']
-				find_line=int(def_s['range']['start']['line'])+1
-				find_char=int(def_s['range']['start']['character'])+1
-				find_end_line=int(def_s['range']['end']['line'])+1
-				find_end_char=int(def_s['range']['end']['character'])+1
-				found=True
+			def_s=self.lsp_endpoint.call_method("textDocument/definition", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
 			
-			if found:
-				urlp = urllib.parse.urlparse(uri_path)
-				urlps = urllib.parse.unquote(os.path.abspath(os.path.join(urlp.netloc, urlp.path)))
-				settings.debugprint("File:"+urlps+" From[Line:"+str(find_line)+" Character:"+str(find_char)+"]"+" To[Line:"+str(find_end_line)+" Character:"+str(find_end_char)+"]")
-				return [[urlps, find_line, find_char, uri_path]]
-			else:
+			try:
+				#{"jsonrpc": "2.0", "id": 10, "method": "textDocument/definition", "params": {"textDocument": {"uri": "file:///path.something"}, "position": {"line": 26, "character": 25}}}
+				#{"id":2,"jsonrpc":"2.0","result":[{"range":{"end":{"character":38,"line":575},"start":{"character":20,"line":575}},"uri":"file:///path.something"}]}
+				uri_path=""
+				find_line=0
+				find_char=0
+				find_end_line=0
+				find_end_char=0
+				found=False
+				
+				settings.debugprint(def_s)
+				
+				if type(def_s) == list:
+					uri_path=def_s[0]['uri']
+					find_line=int(def_s[0]['range']['start']['line'])+1
+					find_char=int(def_s[0]['range']['start']['character'])+1
+					find_end_line=int(def_s[0]['range']['end']['line'])+1
+					find_end_char=int(def_s[0]['range']['end']['character'])+1
+					found=True
+				else:
+					uri_path=def_s['uri']
+					find_line=int(def_s['range']['start']['line'])+1
+					find_char=int(def_s['range']['start']['character'])+1
+					find_end_line=int(def_s['range']['end']['line'])+1
+					find_end_char=int(def_s['range']['end']['character'])+1
+					found=True
+				
+				if found:
+					urlp = urllib.parse.urlparse(uri_path)
+					urlps = urllib.parse.unquote(os.path.abspath(os.path.join(urlp.netloc, urlp.path)))
+					settings.debugprint("File:"+urlps+" From[Line:"+str(find_line)+" Character:"+str(find_char)+"]"+" To[Line:"+str(find_end_line)+" Character:"+str(find_end_char)+"]")
+					return [[urlps, find_line, find_char, uri_path]]
+				else:
+					return None
+			except IndexError:
 				return None
-		except IndexError:
-			return None
+		return None
 	def getReferences(self, doc, identifier):
-#		doc_uri = doc.get_uri_for_display()
-		doc_uri = doc.get_file().get_location().get_path()
-		
-		doc_curr_line=identifier.get_line()
-		doc_curr_offset=identifier.get_line_offset()
-
-		uri = "file://" + doc_uri
-		text = open(doc_uri, "r").read()
-		languageId = settings.LSP_LANGUAGES
-		version = 1
-		
-		text_doc={"uri":uri, "languageId":languageId, "version":version, "text":text}
-		result=self.lsp_endpoint.send_notification("textDocument/didOpen", textDocument=text_doc)
-		
-		def_s=self.lsp_endpoint.call_method("textDocument/references", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
-		
+		doctype=settings.get_document_programming_language_type(doc)
+		is_supported=settings.get_if_supported_language_type(doctype,True)
 		retval=[]
-		for def_itr in def_s:
-			urlp = urllib.parse.urlparse(def_itr['uri'])
-			urlps = urllib.parse.unquote(os.path.abspath(os.path.join(urlp.netloc, urlp.path)))
-			# settings.debugprint(def_s)
-			# settings.debugprint("File:"+urlps+" From[Line:"+str(def_s[0]['range']['start']['line']+1)+" Character:"+str(def_s[0]['range']['start']['character'])+"]"+" To[Line:"+str(def_s[0]['range']['end']['line']+1)+" Character:"+str(def_s[0]['range']['end']['character'])+"]")
-			retval.append([urlps, int(def_itr['range']['start']['line'])+1, int(def_itr['range']['start']['character']), def_itr['uri']])
+		if is_supported:
+			doc_uri = doc.get_file().get_location().get_path()
+			
+			doc_curr_line=identifier.get_line()
+			doc_curr_offset=identifier.get_line_offset()
+
+			uri = "file://" + doc_uri
+			text = open(doc_uri, "r").read()
+			languageId = doctype
+			version = 1
+			
+			text_doc={"uri":uri, "languageId":languageId, "version":version, "text":text}
+			result=self.lsp_endpoint.send_notification("textDocument/didOpen", textDocument=text_doc)
+			
+			def_s=self.lsp_endpoint.call_method("textDocument/references", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
+			
+			for def_itr in def_s:
+				urlp = urllib.parse.urlparse(def_itr['uri'])
+				urlps = urllib.parse.unquote(os.path.abspath(os.path.join(urlp.netloc, urlp.path)))
+				# settings.debugprint(def_s)
+				# settings.debugprint("File:"+urlps+" From[Line:"+str(def_s[0]['range']['start']['line']+1)+" Character:"+str(def_s[0]['range']['start']['character'])+"]"+" To[Line:"+str(def_s[0]['range']['end']['line']+1)+" Character:"+str(def_s[0]['range']['end']['character'])+"]")
+				retval.append([urlps, int(def_itr['range']['start']['line'])+1, int(def_itr['range']['start']['character']), def_itr['uri']])
 			
 		return retval
 		
 	def getHover(self, doc, identifier):
-#		doc_uri = doc.get_uri_for_display()
+		doctype=settings.get_document_programming_language_type(doc)
 		doc_uri = doc.get_file().get_location().get_path()
 		
 		doc_curr_line=identifier.get_line()
@@ -392,7 +394,7 @@ class LspNavigator:
 
 		uri = "file://" + doc_uri
 		text = open(doc_uri, "r").read()
-		languageId = settings.LSP_LANGUAGES
+		languageId = doctype
 		version = 1
 		
 		text_doc={"uri":uri, "languageId":languageId, "version":version, "text":text}
@@ -407,25 +409,28 @@ class LspNavigator:
 		return def_s
 	
 	def getSuggestions(self, doc, identifier):
-#		doc_uri = doc.get_uri_for_display()
-		doc_uri = doc.get_file().get_location().get_path()
-		
-		doc_curr_line=identifier.get_line()
-		doc_curr_offset=identifier.get_line_offset()
+		doctype=settings.get_document_programming_language_type(doc)
+		is_supported=settings.get_if_supported_language_type(doctype,True)
+		if is_supported:
+			doc_uri = doc.get_file().get_location().get_path()
+			
+			doc_curr_line=identifier.get_line()
+			doc_curr_offset=identifier.get_line_offset()
 
-		uri = "file://" + doc_uri
-		text = open(doc_uri, "r").read()
-		languageId = settings.LSP_LANGUAGES
-		version = 1
-		
-		text_doc={"uri":uri, "languageId":languageId, "version":version, "text":text}
-		result=self.lsp_endpoint.send_notification("textDocument/didOpen", textDocument=text_doc)
-		
-		print("line:"+str(doc_curr_line)+" character:"+str(doc_curr_offset))
-		
-		def_s=self.lsp_endpoint.call_method("textDocument/completion", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
-		
-		return def_s
+			uri = "file://" + doc_uri
+			text = open(doc_uri, "r").read()
+			languageId = doctype
+			version = 1
+			
+			text_doc={"uri":uri, "languageId":languageId, "version":version, "text":text}
+			result=self.lsp_endpoint.send_notification("textDocument/didOpen", textDocument=text_doc)
+			
+			print("line:"+str(doc_curr_line)+" character:"+str(doc_curr_offset))
+			
+			def_s=self.lsp_endpoint.call_method("textDocument/completion", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
+			
+			return def_s
+		return None
 
 	def _initialize_project_path(self, path):
 		capabilities = json.loads(settings.LSP_SETTINGS)

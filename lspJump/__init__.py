@@ -34,7 +34,6 @@ ACTION_DEFS = [
 	("lspJumpProjDir", "lspJump settings", settings.keyProjDir)
 ]
 
-
 class lspJumpAppActivatable(GObject.Object, Gedit.AppActivatable):
 
 	app = GObject.property(type=Gedit.App)
@@ -85,7 +84,9 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 	def on_tab_changed(self, window):
 		text_view = self.window.get_active_view()
 		if text_view:
-			text_view.connect('query-tooltip', self.on_motion_notify_event)
+			# document_type=settings.get_window_programming_language_type(self.window)
+			# print("DOCUMENT TYPE="+document_type)
+			text_view.connect('query-tooltip', self.on_motion_notify_event_first)
 			if settings.DEVELOP_FEATURES:
 				text_view.connect('key-press-event', self.on_tab_added)
 			text_view.set_has_tooltip(True)
@@ -160,9 +161,16 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 		text_replacement=suggestion["textEdit"]["newText"]
 		self.replace_text(text_view,start_line, start_character, end_line, end_character, text_replacement)
 		widget.dialog.destroy()
+	def on_motion_notify_event_first(self, textview, x, y, keyboard_mode, tooltip):
+		textview.disconnect_by_func(self.on_motion_notify_event_first)
+		doctype=settings.get_window_programming_language_type(self.window)
+		is_supported=settings.get_if_supported_language_type(doctype,False)
+		
+		if is_supported:
+			textview.connect('query-tooltip', self.on_motion_notify_event)
+		
 	def on_motion_notify_event(self, textview, x, y, keyboard_mode, tooltip):
 		additional=""
-		
 		if settings.LSP_NAVIGATOR is not None:
 			doc = self.window.get_active_document()
 			buffer_coords = textview.window_to_buffer_coords(Gtk.TextWindowType.WIDGET, x, y)

@@ -1,6 +1,6 @@
 <data>
-	<language name="C">
-		<lsp_language>C</lsp_language>
+	<language name="Ccls">
+		<lsp_language>C,C++</lsp_language>
 		<lsp_bin>/usr/bin/ccls</lsp_bin>
 		<lsp_bin_args />
 		<lsp_search>compile_commands.json</lsp_search>
@@ -46,7 +46,7 @@
 		</lsp_settings>
 	</language>
 	<language name="Clangd">
-		<lsp_language>C</lsp_language>
+		<lsp_language>C,C++</lsp_language>
 		<lsp_bin>/usr/bin/clangd</lsp_bin>
 		<lsp_bin_args />
 		<lsp_search>compile_commands.json</lsp_search>
@@ -91,7 +91,7 @@
 		}
 		</lsp_settings>
 	</language>
-	<language name="Python">
+	<language name="Pylsp">
 		<lsp_language>python</lsp_language>
 		<lsp_bin>/usr/bin/pylsp</lsp_bin>
 		<lsp_bin_args />
@@ -138,7 +138,7 @@
 		</lsp_settings>
 	</language>
 	<!-- I think this works a bit better -->
-	<language name="Python-pyls">
+	<language name="Pyls">
 		<lsp_language>python</lsp_language>
 		<lsp_bin>/usr/bin/pyls</lsp_bin>
 		<lsp_bin_args />
@@ -185,7 +185,7 @@
 		</lsp_settings>
 	</language>
 	<!-- Trying to make this work, help needed! Think this might work better if using node or similar, since we then have a configuration file to listen for -->
-	<language name="Javascript">
+	<language name="Quick-lint-js">
 		<lsp_language>Javascript</lsp_language>
 		<lsp_bin>/usr/bin/quick-lint-js</lsp_bin>
 		<lsp_search />
@@ -231,8 +231,8 @@
 		</lsp_settings>
 		<lsp_bin_args>--lsp-server</lsp_bin_args>
 	</language>
-	<language name="Markdown">
-		<lsp_language>markdown</lsp_language>
+	<language name="Marksman">
+		<lsp_language>Markdown</lsp_language>
 		<lsp_bin>/usr/bin/marksman</lsp_bin>
 		<lsp_bin_args />
 		<lsp_search></lsp_search>

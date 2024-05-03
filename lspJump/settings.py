@@ -26,7 +26,7 @@ SETTINGS_DATA = None
 #current language structure
 SETTINGS_LANGUAGE = None
 
-LSP_LANGUAGES = "c"
+LSP_LANGUAGES = "C,C++"
 LSP_BIN = "/usr/bin/ccls"
 LSP_BIN_ARGS = ""
 LSP_SEARCH_PATH = "compile_commands.json"
@@ -87,13 +87,41 @@ DEVELOP_FEATURES = os.getenv("DEVELOP_FEATURES", "").lower() in ["true", "1"]
 
 #########
 
+def get_document_programming_language_type(doc):
+	if doc:
+		# Get the MIME type of the document
+		language=doc.get_language()
+		if language:
+			mime_type=language.get_name()
+			#mime_type = doc.get_mime_type()
+			return mime_type
+	return None
+	
+def get_window_programming_language_type(window):
+	# Get the active view and document
+	view = window.get_active_view()
+	if view:
+		doc = view.get_buffer()
+		return get_document_programming_language_type(doc)
+	return None
+
+def get_if_supported_language_type(doctype,print_on_fail):
+	global LSP_LANGUAGES
+	doctype_lower=doctype.lower()
+	supported_languages=LSP_LANGUAGES.lower().split(',')
+	
+	if doctype_lower in supported_languages:
+		return True
+	elif print_on_fail:
+		print("DOCTYPE="+doctype_lower+" SUPPORTED LANGUAGES="+str(supported_languages))
+	return False
+
 def getValueFromSettings(obj,attr,def_val):
 	lsp_searchs = obj.findall(attr)
 	if lsp_searchs is not None and len(lsp_searchs)>0:
 		if lsp_searchs[0].text is not None and len(lsp_searchs[0].text)>0:
 			return lsp_searchs[0].text
 	return def_val
-
 
 def getSettings(profilename):
 	global LSP_BIN
