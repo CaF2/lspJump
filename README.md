@@ -28,6 +28,12 @@ cd ~/.local/share/gedit/plugins
 git clone https://github.com/CaF2/lspJump.git
 ```
 
+If it is the first time you use lspJump do also:
+```
+cd ~/.local/share/gedit/plugins/lspJump
+cp lspJumpsettings.xml.template lspJumpsettings.xml
+```
+
 Open gedit and do
 
 * gedit -> settings -> plugins -> check lspJump
@@ -35,8 +41,10 @@ Open gedit and do
 ## Usage example
 
 * Open a file with gedit within a "project folder".
-* Hit "F5" and write the path to the folder with "compile_commands.json"
-* Press "change"
+* Hit "F5"
+* Select a profile. In this example we use "Ccls" which supports C,C++
+* Write the path to the folder with "compile_commands.json". You can also try "Search project dir"
+* Press "Change"
 * F3 (go to definition) and F4 (show references) should now work if you have clicked somewhere in your code
 * To go back press "alt+u", to go forwards press "alt+shift+u"
 
