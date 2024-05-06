@@ -46,14 +46,14 @@ Open gedit and do
 * Write the path to the folder with "compile_commands.json". You can also try "Search project dir"
 * Press "Change"
 * F3 (go to definition) and F4 (show references) should now work if you have clicked somewhere in your code
-* To go back press "alt+u", to go forwards press "alt+shift+u"
+* To go back press "alt+r", to go forwards press "alt+shift+r"
 
 ## What should work
 
-* Go to definition
-* Show references
+* Go to definition (F3)
+* Show references (F4)
 * Hover to see information
-* Tab completion is in development, to see progress set the environment variable DEVELOP_FEATURES=true
+* Tab completion (Ctrl+e)
 
 ## Note for Makefile users
 

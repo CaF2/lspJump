@@ -74,8 +74,9 @@ MAX_SAVE_PATH = 20
 
 keyJumpDef = "F3"
 keyJumpRef = "F4"
-keyJumpBack = "<Alt>u"
-keyJumpNext = "<Alt><Shift>u"
+keyJumpBack = "<Alt>r"
+keyJumpNext = "<Alt><Shift>r"
+tabSuggestion = "<Ctrl><Tab>"
 keyProjDir = "F5"
 
 historymax = 100

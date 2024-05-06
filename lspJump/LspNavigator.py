@@ -425,7 +425,7 @@ class LspNavigator:
 			text_doc={"uri":uri, "languageId":languageId, "version":version, "text":text}
 			result=self.lsp_endpoint.send_notification("textDocument/didOpen", textDocument=text_doc)
 			
-			print("line:"+str(doc_curr_line)+" character:"+str(doc_curr_offset))
+			# print("line:"+str(doc_curr_line)+" character:"+str(doc_curr_offset))
 			
 			def_s=self.lsp_endpoint.call_method("textDocument/completion", textDocument={"uri":"file://"+doc_uri}, position={"line":doc_curr_line,"character":doc_curr_offset})
 			

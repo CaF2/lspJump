@@ -18,7 +18,7 @@ from collections import deque
 from subprocess import CalledProcessError
 import os
 
-from gi.repository import GObject, Gedit, Gio, Gtk
+from gi.repository import GObject, Gedit, Gio, Gtk, Gdk
 from gi.repository import PeasGtk
 
 from lspJump import selectWindow, settings
@@ -87,34 +87,33 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			# document_type=settings.get_window_programming_language_type(self.window)
 			# print("DOCUMENT TYPE="+document_type)
 			text_view.connect('query-tooltip', self.on_motion_notify_event_first)
-			if settings.DEVELOP_FEATURES:
-				text_view.connect('key-press-event', self.on_tab_added)
+			text_view.connect('key-press-event', self.on_tab_added)
 			text_view.set_has_tooltip(True)
 			# text_view.set_tooltip_text("Tooltip")
 
 	def on_tab_added(self, widget, event):
-		if event.keyval == 65289: # 65289 is the keyval for Tab
-			print("Tab key pressed")
+		if event.state & Gdk.ModifierType.CONTROL_MASK and event.keyval == Gdk.KEY_e:
 			
+			text_view = self.window.get_active_view()
 			doc = self.window.get_active_document()
-			# x, y = widget.get_pointer()
-			# buffer_coords = widget.window_to_buffer_coords(Gtk.TextWindowType.WIDGET, x, y)
-			buffer = widget.get_buffer()
+			# x, y = text_view.get_pointer()
+			# buffer_coords = text_view.window_to_buffer_coords(Gtk.TextWindowType.WIDGET, x, y)
+			buffer = text_view.get_buffer()
 			mark = buffer.get_insert()
 			identifier = buffer.get_iter_at_mark(mark)
-			# [obj,identifier] = widget.get_iter_at_location(buffer_coords[0], buffer_coords[1])
+			# [obj,identifier] = text_view.get_iter_at_location(buffer_coords[0], buffer_coords[1])
 			marked_char=identifier.get_char()
 			if marked_char!=' ' and marked_char!='\t':
 				refs = settings.LSP_NAVIGATOR.getSuggestions(doc, identifier)
 				items=refs['items']
 				if len(items)>0:
-					return self.show_suggestions(items,widget)
+					return self.show_suggestions(items,text_view)
 		return False
 	
 	def show_suggestions(self, suggestions, text_view):
 		# Logic to display suggestions
 		dialog = Gtk.Dialog("Suggestions",self.window.get_toplevel(),0,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OK,Gtk.ResponseType.OK))
-		dialog.set_default_size(600, 200)
+		dialog.set_default_size(600, 400)
 		# box = dialog.get_content_area()
 		
 		scrolled_window = Gtk.ScrolledWindow()
@@ -126,9 +125,21 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 		scrolled_window.add(listbox)
 		
 		for suggestion in suggestions:
-			print(suggestion)
+			# print(suggestion)
 			if "filterText" in suggestion:
 				suggestion_btn = Gtk.Button(label=suggestion["filterText"])
+				tooltip_text=""
+				if "label" in suggestion:
+					tooltip_text=suggestion["label"]
+				if "documentation" in suggestion:
+					if len(tooltip_text)>0:
+						tooltip_text=tooltip_text+"\n=====\n"
+					tooltip_text=tooltip_text+suggestion["documentation"]
+				if "textEdit" in suggestion and "newText" in suggestion["textEdit"]:
+					if len(tooltip_text)>0:
+						tooltip_text=tooltip_text+"\n=====\n"
+					tooltip_text=tooltip_text+suggestion["textEdit"]["newText"]
+				suggestion_btn.set_tooltip_text(tooltip_text)
 				suggestion_btn.suggestion=suggestion
 				suggestion_btn.text_view=text_view
 				suggestion_btn.dialog=dialog
@@ -142,17 +153,42 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 		return True
 	
 	def replace_text(self, textview, start_line, start_column, end_line, end_column, new_text):
+		#needs improvement, work like the snippet extension and jump around in the inserted text with tab?
+		if new_text.endswith("$0"):
+			new_text=new_text[:-2]
+		
 		buffer = textview.get_buffer()
 		start_iter = buffer.get_iter_at_line_index(start_line, start_column)
 		end_iter = buffer.get_iter_at_line_index(end_line, end_column)
-		buffer.delete(start_iter, end_iter)
-		buffer.insert(start_iter, new_text)
+		text = buffer.get_text(start_iter, end_iter, False)
+		min_length = min(len(text), len(new_text))
+		
+		first_diff_char=len(text)
+		found_diff=False
+		
+		for i in range(min_length):
+			if text[i] != new_text[i]:
+				first_diff_char=i
+				found_diff=True
+		
+		# print("TEST")
+		# print(text)
+		# print(new_text)
+		# print(first_diff_char)
+		# print(new_text[first_diff_char:])
+		
+		#buffer.insert(start_iter, new_text[first_diff_char:])
+		if found_diff:
+			buffer.delete(start_iter, end_iter)
+			buffer.insert(start_iter, new_text)
+		else:
+			buffer.insert(end_iter, new_text[first_diff_char:])
 	
 	def change_to_suggestion(self, widget):
 		suggestion=widget.suggestion
 		text_view=widget.text_view
-		print("SUGGESTION")
-		print(suggestion)
+		# print("SUGGESTION")
+		# print(suggestion)
 		start_line=suggestion["textEdit"]["range"]["start"]["line"]
 		start_character=suggestion["textEdit"]["range"]["start"]["character"]
 		end_line=suggestion["textEdit"]["range"]["end"]["line"]
