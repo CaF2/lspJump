@@ -93,7 +93,6 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 
 	def on_tab_added(self, widget, event):
 		if event.state & Gdk.ModifierType.CONTROL_MASK and event.keyval == Gdk.KEY_e:
-			
 			text_view = self.window.get_active_view()
 			doc = self.window.get_active_document()
 			# x, y = text_view.get_pointer()
@@ -171,13 +170,6 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 				first_diff_char=i
 				found_diff=True
 		
-		# print("TEST")
-		# print(text)
-		# print(new_text)
-		# print(first_diff_char)
-		# print(new_text[first_diff_char:])
-		
-		#buffer.insert(start_iter, new_text[first_diff_char:])
 		if found_diff:
 			buffer.delete(start_iter, end_iter)
 			buffer.insert(start_iter, new_text)
@@ -217,7 +209,7 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 				if refs is None:
 					#"query-tooltip"
 					textview.disconnect_by_func(self.on_motion_notify_event)
-				if refs["contents"] is not None:
+				if refs and "contents" in refs:
 					for c_obj in refs["contents"]:
 						if len(additional)>0:
 							additional=additional+"\n======\n"
@@ -315,16 +307,11 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			if os.path.realpath(location.get_path())==doc_uri:
 				tab = Gedit.Tab.get_from_document(d)
 				self.window.set_active_tab(tab)
-				# piter=d.get_iter_at_line(line - 1)
 				piter=d.get_iter_at_line_index(line - 1,column - 1)
 				d.place_cursor(piter)
 				self.window.get_active_view().scroll_to_iter(piter,0.25,False,0,0)
 				break
 		else:
-			# file has not opened yet
-			# self.window.create_tab_from_location(
-			# 	location, None, line, 0, False, True
-			# )
 			tab=self.window.create_tab(True)
 			tab.load_file(location, None, line, column, False)
 

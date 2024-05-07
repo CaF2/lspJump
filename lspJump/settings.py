@@ -74,9 +74,9 @@ MAX_SAVE_PATH = 20
 
 keyJumpDef = "F3"
 keyJumpRef = "F4"
-keyJumpBack = "<Alt>r"
-keyJumpNext = "<Alt><Shift>r"
-tabSuggestion = "<Ctrl><Tab>"
+keyJumpBack = "<Alt>F3"
+keyJumpNext = "<Shift>F3"
+# tabSuggestion = "<Ctrl>e"
 keyProjDir = "F5"
 
 historymax = 100
@@ -114,7 +114,7 @@ def get_if_supported_language_type(doctype,print_on_fail):
 	if doctype_lower in supported_languages:
 		return True
 	elif print_on_fail:
-		print("DOCTYPE="+doctype_lower+" SUPPORTED LANGUAGES="+str(supported_languages))
+		print("DOCTYPE=\""+doctype+"\" SUPPORTED LANGUAGES="+str(supported_languages))
 	return False
 
 def getValueFromSettings(obj,attr,def_val):

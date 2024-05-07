@@ -46,7 +46,7 @@ Open gedit and do
 * Write the path to the folder with "compile_commands.json". You can also try "Search project dir"
 * Press "Change"
 * F3 (go to definition) and F4 (show references) should now work if you have clicked somewhere in your code
-* To go back press "alt+r", to go forwards press "alt+shift+r"
+* To go back press "alt+F3", to go forwards press "shift+F3"
 
 ## What should work
 

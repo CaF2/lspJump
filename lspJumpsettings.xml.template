@@ -1,6 +1,6 @@
 <data>
 	<language name="Ccls">
-		<lsp_language>C,C++</lsp_language>
+		<lsp_language>C,C++,C/ObjC Header</lsp_language>
 		<lsp_bin>/usr/bin/ccls</lsp_bin>
 		<lsp_bin_args />
 		<lsp_search>compile_commands.json</lsp_search>
@@ -46,7 +46,7 @@
 		</lsp_settings>
 	</language>
 	<language name="Clangd">
-		<lsp_language>C,C++</lsp_language>
+		<lsp_language>C,C++,C/ObjC Header</lsp_language>
 		<lsp_bin>/usr/bin/clangd</lsp_bin>
 		<lsp_bin_args />
 		<lsp_search>compile_commands.json</lsp_search>
