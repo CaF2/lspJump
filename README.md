@@ -53,7 +53,7 @@ Open gedit and do
 * Go to definition (F3)
 * Show references (F4)
 * Hover to see information
-* Tab completion (Ctrl+e)
+* Completion (Ctrl+e)
 
 ## Note for Makefile users
 
