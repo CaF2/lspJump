@@ -59,6 +59,9 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 	window = GObject.property(type=Gedit.Window)
 	backstack = deque()
 	nextstack = deque()
+	
+	prev_buffer_coords = [0,0]
+	hover_refs = ""
 
 	def do_activate(self):
 		slots = {
@@ -95,12 +98,9 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 		if event.state & Gdk.ModifierType.CONTROL_MASK and event.keyval == Gdk.KEY_e:
 			text_view = self.window.get_active_view()
 			doc = self.window.get_active_document()
-			# x, y = text_view.get_pointer()
-			# buffer_coords = text_view.window_to_buffer_coords(Gtk.TextWindowType.WIDGET, x, y)
 			buffer = text_view.get_buffer()
 			mark = buffer.get_insert()
 			identifier = buffer.get_iter_at_mark(mark)
-			# [obj,identifier] = text_view.get_iter_at_location(buffer_coords[0], buffer_coords[1])
 			marked_char=identifier.get_char()
 			if marked_char!=' ' and marked_char!='\t':
 				refs = settings.LSP_NAVIGATOR.getSuggestions(doc, identifier)
@@ -124,7 +124,7 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 		scrolled_window.add(listbox)
 		
 		for suggestion in suggestions:
-			# print(suggestion)
+			print(suggestion)
 			if "filterText" in suggestion:
 				suggestion_btn = Gtk.Button(label=suggestion["filterText"])
 				tooltip_text=""
@@ -133,7 +133,7 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 				if "documentation" in suggestion:
 					if len(tooltip_text)>0:
 						tooltip_text=tooltip_text+"\n=====\n"
-					tooltip_text=tooltip_text+suggestion["documentation"]
+					tooltip_text=tooltip_text+str(suggestion["documentation"])
 				if "textEdit" in suggestion and "newText" in suggestion["textEdit"]:
 					if len(tooltip_text)>0:
 						tooltip_text=tooltip_text+"\n=====\n"
@@ -196,7 +196,14 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 		
 		if is_supported:
 			textview.connect('query-tooltip', self.on_motion_notify_event)
-		
+	
+	def is_not_inside_prev_buff_range(self, prev_buf, buf):
+		box_size=2
+		# print(str(buf[0])+","+str(prev_buf[0])+","+str(buf[1])+","+str(prev_buf[1]))
+		if (buf[0]>prev_buf[0]+box_size or buf[0]<prev_buf[0]-box_size) or (buf[1]>prev_buf[1]+box_size or buf[1]<prev_buf[1]-box_size):
+			return True
+		return False
+	
 	def on_motion_notify_event(self, textview, x, y, keyboard_mode, tooltip):
 		additional=""
 		if settings.LSP_NAVIGATOR is not None:
@@ -205,12 +212,15 @@ class lspJumpWindowActivatable(GObject.Object, Gedit.WindowActivatable, PeasGtk.
 			[obj,identifier] = textview.get_iter_at_location(buffer_coords[0], buffer_coords[1])
 			marked_char=identifier.get_char()
 			if marked_char!=' ' and marked_char!='\t':
-				refs = settings.LSP_NAVIGATOR.getHover(doc, identifier)
-				if refs is None:
+				if self.is_not_inside_prev_buff_range(self.prev_buffer_coords,buffer_coords):
+					# print("GET NEW")
+					self.hover_refs = settings.LSP_NAVIGATOR.getHover(doc, identifier)
+					self.prev_buffer_coords=buffer_coords
+				if self.hover_refs is None:
 					#"query-tooltip"
 					textview.disconnect_by_func(self.on_motion_notify_event)
-				if refs and "contents" in refs:
-					for c_obj in refs["contents"]:
+				if self.hover_refs and "contents" in self.hover_refs:
+					for c_obj in self.hover_refs["contents"]:
 						if len(additional)>0:
 							additional=additional+"\n======\n"
 						if type(c_obj) == str:
